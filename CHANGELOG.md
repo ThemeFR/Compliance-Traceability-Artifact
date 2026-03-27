@@ -52,9 +52,15 @@ The following additions were derived from a structured Elicit session with a rea
 
 ## [Unreleased]
 
+### Added in v0.1.1 (crypto-agile patch)
+- **Crypto-agile `signature.algorithm`** — expanded from `["SHA-256"]` to `["SHA-256", "CRYSTALS-Dilithium", "hybrid"]`. Backwards-compatible: SHA-256 artifacts remain valid.
+- **`cryptography` block (optional top-level property)** — extended metadata for PQC signing: `signature_algorithm`, `fips_validated`, `fips_level`, `pqc_compliant`, `cnsa_2_0_compliant`, `nist_pqc_standard` (FIPS-204/FIPS-203), `trust_anchor` (software | SEALSQ-US-RoT | SEALSQ-QS7001 | SEALSQ-QVault-TPM), `hybrid_classical`, `certificate`, `trust_chain`, `artifact_hash`, `issued_at`, `expires_at`. Required when algorithm is `CRYSTALS-Dilithium` or `hybrid`.
+- **Policy signal:** Katie Arrington (CMMC architect) joined IonQ January 2026. NIST PQC standards finalized August 2024 (CRYSTALS-Dilithium = FIPS-204). CNSA 2.0 mandates are coming. CTA is crypto-agile before the mandate arrives.
+
 ### Planned for v0.2
 - OSCAL SSP mapping guide
 - NemoClaw connector specification (MCP server interface)
 - CTA Verify API OpenAPI specification
+- SEALSQ INeS integration guide (quantum-secure signing walkthrough)
 - Additional worked examples: IT services, logistics, healthcare sectors
 - C3PAO assessor review and validation notes

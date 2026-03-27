@@ -203,19 +203,18 @@
     },
     "signature": {
       "type": "object",
-      "description": "Cryptographic signature over the artifact payload.",
+      "description": "Cryptographic signature over the artifact payload. Crypto-agile: supports classical SHA-256, post-quantum CRYSTALS-Dilithium (FIPS-204), and hybrid modes. When algorithm is CRYSTALS-Dilithium or hybrid, the cryptography block must also be present.",
       "required": ["algorithm", "value", "signed_at"],
       "additionalProperties": false,
       "properties": {
         "algorithm": {
           "type": "string",
-          "enum": ["SHA-256"],
-          "description": "Hashing algorithm used to sign the artifact."
+          "enum": ["SHA-256", "CRYSTALS-Dilithium", "hybrid"],
+          "description": "'SHA-256' = classical FIPS-compatible (default). 'CRYSTALS-Dilithium' = NIST PQC standard (FIPS-204), quantum-resistant. 'hybrid' = both algorithms applied; verifiers may use either — recommended during transition period."
         },
         "value": {
           "type": "string",
-          "pattern": "^[a-f0-9]{64}$",
-          "description": "Lowercase hex-encoded SHA-256 digest of the canonical artifact payload (controls + issuer + generated_at, with signature field omitted)."
+          "description": "Signature value. For SHA-256: lowercase hex-encoded 64-char digest. For CRYSTALS-Dilithium: base64url-encoded Dilithium signature. For hybrid: base64url-encoded composite. Computed over canonical artifact payload with signature and cryptography fields omitted."
         },
         "signed_at": {
           "type": "string",
@@ -225,6 +224,74 @@
         "signed_by": {
           "type": "string",
           "description": "System that generated the signature (e.g., 'NemoClaw v1.0', 'CTA Studio v0.1')."
+        }
+      }
+    },
+    "cryptography": {
+      "type": "object",
+      "description": "Extended cryptographic metadata. Required when signature.algorithm is 'CRYSTALS-Dilithium' or 'hybrid'. Optional for SHA-256 signers. Enables quantum-secure signing via SEALSQ INeS PKI-as-a-Service and forward compatibility with CNSA 2.0 mandates.",
+      "additionalProperties": false,
+      "required": ["signature_algorithm", "pqc_compliant", "trust_anchor"],
+      "properties": {
+        "signature_algorithm": {
+          "type": "string",
+          "enum": ["SHA-256", "CRYSTALS-Dilithium", "hybrid"],
+          "description": "Algorithm used to produce the signature in the signature block. Must match signature.algorithm."
+        },
+        "fips_validated": {
+          "type": "boolean",
+          "description": "Whether the signing module is FIPS-validated."
+        },
+        "fips_level": {
+          "type": "string",
+          "enum": ["FIPS-140-2", "FIPS-140-3"],
+          "description": "FIPS validation level. CRYSTALS-Dilithium implementations target FIPS-140-3."
+        },
+        "pqc_compliant": {
+          "type": "boolean",
+          "description": "Whether the signature uses a NIST-selected post-quantum algorithm (CRYSTALS-Dilithium = FIPS-204, CRYSTALS-Kyber = FIPS-203)."
+        },
+        "cnsa_2_0_compliant": {
+          "type": "boolean",
+          "description": "Whether the signing implementation meets NSA Commercial National Security Algorithm Suite 2.0 requirements."
+        },
+        "nist_pqc_standard": {
+          "type": "string",
+          "enum": ["FIPS-204", "FIPS-203"],
+          "description": "NIST PQC standard used. FIPS-204 = CRYSTALS-Dilithium (signatures). FIPS-203 = CRYSTALS-Kyber (key encapsulation)."
+        },
+        "trust_anchor": {
+          "type": "string",
+          "enum": ["software", "SEALSQ-QS7001", "SEALSQ-QVault-TPM", "SEALSQ-US-RoT"],
+          "description": "'software' = software-only signing (standard tier). 'SEALSQ-US-RoT' = SEALSQ U.S.-soil Root of Trust via INeS API (quantum-ready tier). 'SEALSQ-QS7001' = hardware secure element (high-assurance tier). 'SEALSQ-QVault-TPM' = hardware TPM (high-assurance tier)."
+        },
+        "hybrid_classical": {
+          "type": "boolean",
+          "description": "Whether a classical SHA-256 signature is included alongside the PQC signature (hybrid mode). Recommended during the transition period so SHA-256-only verifiers remain compatible."
+        },
+        "certificate": {
+          "type": "string",
+          "description": "PEM-encoded signing certificate issued by SEALSQ INeS PKI-as-a-Service, if applicable."
+        },
+        "trust_chain": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ordered array of PEM-encoded intermediate and root certificates completing the trust chain to the SEALSQ Root of Trust."
+        },
+        "artifact_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hex digest of the canonical artifact payload (computed before signing). Stable reference for verification regardless of signature algorithm."
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp when the signing certificate was issued by INeS."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp when the signing certificate expires."
         }
       }
     }
