@@ -1,0 +1,405 @@
+{
+  "_comment": "Marcus Webb — Webb Precision Manufacturing, Rockford IL. 67 employees. 3 active DoD contracts ($4.2M). SPRS score post-remediation. This is a worked example showing a real-world CTA artifact after the five priority remediations from the Elicit session were completed.",
+  "cta_version": "0.1",
+  "artifact_id": "a3f8e2c1-47b6-4d9a-8e5f-1c2d3e4f5a6b",
+  "schema": "https://github.com/ThemeFR/cta/raw/main/spec/cta-v0.1.schema.json",
+  "generated_at": "2026-03-26T14:23:11Z",
+  "valid_until": "2027-03-26T14:23:11Z",
+  "issuer": {
+    "organization": "Webb Precision Manufacturing Inc.",
+    "dba": "Webb Precision",
+    "cage_code": "7K2M9",
+    "uei": "WBBPREC12345",
+    "sam_registered": true,
+    "contact_email": "compliance@webbprecision.example.com",
+    "employee_count": 67
+  },
+  "assessment": {
+    "type": "self",
+    "assessment_date": "2026-03-25",
+    "connector_version": "NemoClaw v1.0 / CTA Studio v0.1"
+  },
+  "invariants": {
+    "shared_account_violation": {
+      "detected": false,
+      "affected_controls": ["AC.L2-3.1.1", "IA.L2-3.5.1", "AU.L2-3.3.2"],
+      "detail": "Shared CNC programming account (cnc_shared@webbprecision.local) eliminated 2026-03-10. Two individual licensed accounts provisioned: j.okafor@webbprecision.local and t.hernandez@webbprecision.local. MFA enforced on both.",
+      "source": "AzureAD"
+    }
+  },
+  "controls": [
+    {
+      "control_id": "AC.L2-3.1.1",
+      "nist_id": "3.1.1",
+      "family": "AC",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0001-0001-0001-000000000001",
+          "type": "configuration_export",
+          "source": "AzureAD",
+          "collected_at": "2026-03-25T08:00:00Z",
+          "detail": "Azure AD user directory export confirming all 67 accounts are individually named, no shared accounts. Conditional Access policies enforce device compliance before system access.",
+          "fips_validated": true,
+          "hash": "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+          "connector": "cta-azuread-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "AC.L2-3.1.5",
+      "nist_id": "3.1.5",
+      "family": "AC",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0001-0005-0001-000000000002",
+          "type": "access_control_list",
+          "source": "AzureAD",
+          "collected_at": "2026-03-25T08:02:00Z",
+          "detail": "Role-based access control export from Azure AD. 4 privileged admin accounts separated from 63 standard user accounts. Admin accounts require PIM justification for elevation.",
+          "fips_validated": true,
+          "hash": "sha256:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3",
+          "connector": "cta-azuread-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "AC.L2-3.1.13",
+      "nist_id": "3.1.13",
+      "family": "AC",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0001-0013-0001-000000000003",
+          "type": "configuration_export",
+          "source": "AzureAD",
+          "collected_at": "2026-03-25T08:04:00Z",
+          "detail": "VPN configuration export confirming TLS 1.3 enforced on all remote access sessions. Split tunneling disabled. All remote traffic routed through managed access point.",
+          "fips_validated": true,
+          "hash": "sha256:c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+          "connector": "cta-azuread-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "AU.L2-3.3.1",
+      "nist_id": "3.3.1",
+      "family": "AU",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0003-0001-0001-000000000004",
+          "type": "log",
+          "source": "Splunk",
+          "collected_at": "2026-03-25T08:10:00Z",
+          "detail": "Splunk audit log retention policy confirmation. Logs retained 365 days minimum. All system events (login, file access, privilege escalation, network egress) captured. Log integrity protection enabled.",
+          "fips_validated": false,
+          "hash": "sha256:d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5",
+          "connector": "cta-splunk-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "AU.L2-3.3.2",
+      "nist_id": "3.3.2",
+      "family": "AU",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0003-0002-0001-000000000005",
+          "type": "log",
+          "source": "Splunk",
+          "collected_at": "2026-03-25T08:12:00Z",
+          "detail": "Individual user attribution confirmed in all audit log entries. Login events, file access events, and admin actions all carry unique user identifiers. Shared account cnc_shared deprovisioned 2026-03-10 — zero logins since.",
+          "fips_validated": false,
+          "hash": "sha256:e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6",
+          "connector": "cta-splunk-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "CM.L2-3.4.1",
+      "nist_id": "3.4.1",
+      "family": "CM",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0004-0001-0001-000000000006",
+          "type": "device_inventory",
+          "source": "Intune",
+          "collected_at": "2026-03-25T08:20:00Z",
+          "detail": "Intune managed device inventory export. 47 devices registered (31 workstations, 12 laptops, 4 servers). All devices enrolled with compliance policy enforced. 2 personal devices blocked — not enrolled.",
+          "fips_validated": false,
+          "hash": "sha256:f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1",
+          "connector": "cta-intune-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "IA.L2-3.5.1",
+      "nist_id": "3.5.1",
+      "family": "IA",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0005-0001-0001-000000000007",
+          "type": "configuration_export",
+          "source": "Okta",
+          "collected_at": "2026-03-25T08:30:00Z",
+          "detail": "Okta user directory export. 67 unique user accounts, 4 service accounts, 0 shared accounts. All accounts tied to named individuals with manager approval workflow for provisioning.",
+          "fips_validated": true,
+          "hash": "sha256:a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3",
+          "connector": "cta-okta-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "IA.L2-3.5.2",
+      "nist_id": "3.5.2",
+      "family": "IA",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0005-0002-0001-000000000008",
+          "type": "mfa_enforcement_report",
+          "source": "Okta",
+          "collected_at": "2026-03-25T08:32:00Z",
+          "detail": "Okta authentication policy report confirming authentication required for all system access. Zero unauthenticated access endpoints. Password reset requires identity verification.",
+          "fips_validated": true,
+          "hash": "sha256:b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4",
+          "connector": "cta-okta-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "IA.L2-3.5.3",
+      "nist_id": "3.5.3",
+      "family": "IA",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0005-0003-0001-000000000009",
+          "type": "mfa_enforcement_report",
+          "source": "Okta",
+          "collected_at": "2026-03-25T08:34:00Z",
+          "detail": "Okta MFA enforcement report. Authenticator app (TOTP) enforced for all 67 users. Hardware key (FIDO2/YubiKey) enforced for 4 privileged admin accounts. Zero MFA bypass exceptions active. 100% enrollment.",
+          "fips_validated": true,
+          "hash": "sha256:c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5",
+          "connector": "cta-okta-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "IR.L2-3.6.1",
+      "nist_id": "3.6.1",
+      "family": "IR",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0006-0001-0001-000000000010",
+          "type": "policy_document",
+          "source": "manual",
+          "collected_at": "2026-03-20T09:00:00Z",
+          "detail": "Incident Response Plan v2.1 — approved by Marcus Webb (CEO) 2026-03-20. Covers preparation, detection, analysis, containment, eradication, recovery. Integrates CrowdStrike alert workflow. DoD reporting contacts included (US-CERT, DIBNet).",
+          "fips_validated": false,
+          "hash": "sha256:d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6"
+        }
+      ]
+    },
+    {
+      "control_id": "MP.L2-3.8.1",
+      "nist_id": "3.8.1",
+      "family": "MP",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 3,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0008-0001-0001-000000000011",
+          "type": "job_traveler_audit",
+          "source": "physical_review",
+          "collected_at": "2026-03-22T10:00:00Z",
+          "detail": "Physical CUI document audit — shop floor. 14 job traveler packages reviewed. All packages containing drawing numbers with DoD contract numbers are now marked CUI per NARA guidelines. Secure storage cabinet installed in CNC programming area 2026-03-15. Audit procedure document: MP-001 v1.0.",
+          "fips_validated": false,
+          "hash": "sha256:e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7"
+        }
+      ]
+    },
+    {
+      "control_id": "RA.L2-3.11.2",
+      "nist_id": "3.11.2",
+      "family": "RA",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0011-0002-0001-000000000012",
+          "type": "vulnerability_scan",
+          "source": "CrowdStrike",
+          "collected_at": "2026-03-24T23:00:00Z",
+          "detail": "CrowdStrike Falcon Spotlight vulnerability scan — overnight run 2026-03-24. 47 managed devices scanned. 0 critical CVEs unpatched. 3 medium CVEs identified — remediation assigned to P. Kowalski, target date 2026-04-07.",
+          "fips_validated": false,
+          "hash": "sha256:f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2",
+          "connector": "cta-crowdstrike-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "CA.L2-3.12.4",
+      "nist_id": "3.12.4",
+      "family": "CA",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0012-0004-0001-000000000013",
+          "type": "policy_document",
+          "source": "manual",
+          "collected_at": "2026-03-18T14:00:00Z",
+          "detail": "System Security Plan (SSP) v1.0 — Webb Precision Manufacturing. Approved by Marcus Webb (CEO) 2026-03-18. Documents system boundary, network topology, all 110 control implementations, POA&M items, and connections to Lockheed Martin supplier portal. Stored in version-controlled SharePoint with access controls.",
+          "fips_validated": false,
+          "hash": "sha256:a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4"
+        }
+      ]
+    },
+    {
+      "control_id": "SC.L2-3.13.8",
+      "nist_id": "3.13.8",
+      "family": "SC",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0013-0008-0001-000000000014",
+          "type": "configuration_export",
+          "source": "AzureAD",
+          "collected_at": "2026-03-25T09:00:00Z",
+          "detail": "Azure AD and VPN configuration confirming TLS 1.3 (AES-256-GCM) for all CUI transmission paths. Email encryption enforced via M365 DLP policies for outbound messages to DoD domains. File transfer to Lockheed portal uses SFTP with FIPS-140-2 validated OpenSSH.",
+          "fips_validated": true,
+          "hash": "sha256:b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5",
+          "connector": "cta-azuread-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "SC.L2-3.13.11",
+      "nist_id": "3.13.11",
+      "family": "SC",
+      "status": "met",
+      "maturity": 3,
+      "sprs_weight": 5,
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0013-0011-0001-000000000015",
+          "type": "configuration_export",
+          "source": "AzureAD",
+          "collected_at": "2026-03-25T09:05:00Z",
+          "detail": "FIPS 140-2 validated cryptography confirmed across all CUI protection systems. Windows Server configured with FIPS-compliant algorithms enforced via Group Policy. M365 tenant enforces FIPS-compliant TLS. VPN uses FIPS-validated OpenSSL module (certificate: CMVP #4213).",
+          "fips_validated": true,
+          "hash": "sha256:c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6",
+          "connector": "cta-azuread-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "SI.L2-3.14.1",
+      "nist_id": "3.14.1",
+      "family": "SI",
+      "status": "planned",
+      "maturity": 2,
+      "sprs_weight": 5,
+      "poam": {
+        "description": "Formalized patch management SLA under development. CrowdStrike currently identifies vulnerabilities but written remediation SLA (critical: 15 days, high: 30 days) not yet approved as policy document.",
+        "target_date": "2026-05-01",
+        "milestone": "Patch Management Policy v1.0 signed by CEO",
+        "owner": "P. Kowalski (IT Manager)"
+      },
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0014-0001-0001-000000000016",
+          "type": "vulnerability_scan",
+          "source": "CrowdStrike",
+          "collected_at": "2026-03-25T08:45:00Z",
+          "detail": "CrowdStrike confirms active vulnerability scanning and patching in practice. 3 medium CVEs under remediation. Written patch management policy not yet documented — POA&M item SI-001.",
+          "fips_validated": false,
+          "hash": "sha256:d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7",
+          "connector": "cta-crowdstrike-connector-v1"
+        }
+      ]
+    },
+    {
+      "control_id": "SI.L2-3.14.2",
+      "nist_id": "3.14.2",
+      "family": "SI",
+      "status": "planned",
+      "maturity": 2,
+      "sprs_weight": 5,
+      "poam": {
+        "description": "CrowdStrike Falcon endpoint protection active on all 47 managed devices. 3 legacy Windows 7 CNC workstations running without EDR coverage — scheduled for OS upgrade or network isolation.",
+        "target_date": "2026-05-15",
+        "milestone": "Legacy CNC workstations upgraded to Windows 10 LTSC or network-isolated with monitored VLAN",
+        "owner": "P. Kowalski (IT Manager)"
+      },
+      "evidence": [
+        {
+          "evidence_id": "e1a2b3c4-0014-0002-0001-000000000017",
+          "type": "device_inventory",
+          "source": "CrowdStrike",
+          "collected_at": "2026-03-25T08:50:00Z",
+          "detail": "CrowdStrike Falcon sensor deployment status: 44/47 devices protected. 3 legacy CNC workstations (WIN7-CNC-01, WIN7-CNC-02, WIN7-CNC-03) not enrolled — OS unsupported by Falcon. POA&M item SI-002.",
+          "fips_validated": false,
+          "hash": "sha256:e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8",
+          "connector": "cta-crowdstrike-connector-v1"
+        }
+      ]
+    }
+  ],
+  "sprs_score": {
+    "calculated": 101,
+    "maximum": 110,
+    "c3pao_eligible": true,
+    "deductions": [
+      {
+        "control_id": "SI.L2-3.14.1",
+        "points_deducted": 3,
+        "reason": "partially_implemented"
+      },
+      {
+        "control_id": "SI.L2-3.14.2",
+        "points_deducted": 3,
+        "reason": "partially_implemented"
+      }
+    ],
+    "poam_items": 2
+  },
+  "signature": {
+    "algorithm": "SHA-256",
+    "value": "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+    "signed_at": "2026-03-26T14:23:11Z",
+    "signed_by": "CTA Studio v0.1"
+  }
+}

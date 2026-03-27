@@ -1,0 +1,352 @@
+{
+  "$schema": "https://json-schema.org/draft/07/schema",
+  "$id": "https://github.com/ThemeFR/cta/raw/main/spec/cta-v0.1.schema.json",
+  "title": "CTA Artifact",
+  "description": "Compliance Traceability Artifact — portable, machine-readable CMMC Level 2 compliance proof. Published under CC BY 4.0. Schema spine: NIST SP 800-171 Rev 2.",
+  "version": "0.1",
+  "doi": "10.5281/zenodo.pending",
+  "type": "object",
+  "required": [
+    "cta_version",
+    "artifact_id",
+    "generated_at",
+    "valid_until",
+    "issuer",
+    "assessment",
+    "controls",
+    "sprs_score",
+    "signature"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "cta_version": {
+      "type": "string",
+      "const": "0.1",
+      "description": "CTA schema version. Increment minor for backwards-compatible additions, major for breaking changes."
+    },
+    "artifact_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Globally unique identifier for this artifact instance. A new artifact_id is generated on every CTA Studio export."
+    },
+    "schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the JSON Schema used to validate this artifact.",
+      "default": "https://github.com/ThemeFR/cta/raw/main/spec/cta-v0.1.schema.json"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp when this artifact was generated."
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp after which the artifact is considered stale. Recommended: 365 days from generated_at for self-assessments, 90 days for C3PAO-assessed artifacts."
+    },
+    "issuer": {
+      "type": "object",
+      "description": "The organization issuing this compliance artifact.",
+      "required": ["organization", "cage_code", "uei", "sam_registered"],
+      "additionalProperties": false,
+      "properties": {
+        "organization": {
+          "type": "string",
+          "description": "Legal organization name as registered in SAM.gov."
+        },
+        "dba": {
+          "type": "string",
+          "description": "Doing-business-as name, if applicable."
+        },
+        "cage_code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{5}$",
+          "description": "CAGE code — 5-character alphanumeric, assigned by DLA."
+        },
+        "uei": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{12}$",
+          "description": "Unique Entity Identifier — 12-character alphanumeric, assigned by SAM.gov."
+        },
+        "sam_registered": {
+          "type": "boolean",
+          "description": "Whether the issuing organization is currently registered in SAM.gov."
+        },
+        "contact_email": {
+          "type": "string",
+          "format": "email",
+          "description": "Primary compliance contact email."
+        },
+        "employee_count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Approximate number of employees. Used for SPRS context and design partner classification."
+        }
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "description": "Metadata about how the assessment was conducted.",
+      "required": ["type", "assessment_date"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["self", "c3pao", "third_party"],
+          "description": "Assessment type. 'self' = CMMC Phase 1 self-assessment. 'c3pao' = C3PAO-conducted (required Phase 2+). 'third_party' = informal third-party review."
+        },
+        "assessor_id": {
+          "type": "string",
+          "description": "C3PAO organization ID or assessor credential, if applicable."
+        },
+        "assessment_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date assessment was conducted (ISO 8601 date)."
+        },
+        "sprs_submission_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date SPRS score was submitted to the PIEE portal, if applicable."
+        },
+        "connector_version": {
+          "type": "string",
+          "description": "Version of NemoClaw or CTA Studio connector used for automated evidence collection."
+        }
+      }
+    },
+    "controls": {
+      "type": "array",
+      "description": "Array of CMMC Level 2 control assessments. One entry per NIST SP 800-171 Rev 2 practice assessed.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/control_assessment"
+      }
+    },
+    "invariants": {
+      "type": "object",
+      "description": "Cross-control invariant checks. Violations automatically override maturity scores on affected controls regardless of evidence.",
+      "additionalProperties": false,
+      "properties": {
+        "shared_account_violation": {
+          "type": "object",
+          "description": "Fires when multiple users are detected authenticating with the same credential. Automatically sets maturity to 0 for AC.L2-3.1.1, IA.L2-3.5.1, and AU.L2-3.3.2.",
+          "additionalProperties": false,
+          "properties": {
+            "detected": {
+              "type": "boolean",
+              "description": "Whether a shared account violation was detected."
+            },
+            "affected_controls": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Control IDs whose maturity is forced to 0 by this violation.",
+              "default": ["AC.L2-3.1.1", "IA.L2-3.5.1", "AU.L2-3.3.2"]
+            },
+            "detail": {
+              "type": "string",
+              "description": "Description of the shared account(s) detected."
+            },
+            "source": {
+              "type": "string",
+              "description": "System or connector that detected the violation (e.g., Okta, AzureAD, CrowdStrike)."
+            }
+          }
+        }
+      }
+    },
+    "sprs_score": {
+      "type": "object",
+      "description": "Calculated SPRS score per the DoD Assessment Methodology for NIST SP 800-171 (v1.2.1).",
+      "required": ["calculated", "maximum"],
+      "additionalProperties": false,
+      "properties": {
+        "calculated": {
+          "type": "integer",
+          "minimum": -203,
+          "maximum": 110,
+          "description": "Calculated SPRS score. Range: -203 (all controls failed) to +110 (all controls met). Score of 88+ required for C3PAO assessment eligibility."
+        },
+        "maximum": {
+          "type": "integer",
+          "const": 110,
+          "description": "Maximum achievable SPRS score."
+        },
+        "deductions": {
+          "type": "array",
+          "description": "Itemized deductions contributing to the score.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["control_id", "points_deducted", "reason"],
+            "properties": {
+              "control_id": { "type": "string" },
+              "points_deducted": { "type": "integer", "minimum": 1 },
+              "reason": {
+                "type": "string",
+                "enum": ["not_implemented", "partially_implemented", "invariant_override"]
+              }
+            }
+          }
+        },
+        "poam_items": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of active Plan of Action & Milestones items."
+        },
+        "c3pao_eligible": {
+          "type": "boolean",
+          "description": "Whether the calculated score meets the 88-point threshold for C3PAO assessment scheduling."
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "description": "Cryptographic signature over the artifact payload.",
+      "required": ["algorithm", "value", "signed_at"],
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["SHA-256"],
+          "description": "Hashing algorithm used to sign the artifact."
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Lowercase hex-encoded SHA-256 digest of the canonical artifact payload (controls + issuer + generated_at, with signature field omitted)."
+        },
+        "signed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp when the signature was generated."
+        },
+        "signed_by": {
+          "type": "string",
+          "description": "System that generated the signature (e.g., 'NemoClaw v1.0', 'CTA Studio v0.1')."
+        }
+      }
+    }
+  },
+  "definitions": {
+    "control_assessment": {
+      "type": "object",
+      "description": "Assessment record for a single CMMC Level 2 practice.",
+      "required": ["control_id", "nist_id", "family", "status", "maturity", "sprs_weight"],
+      "additionalProperties": false,
+      "properties": {
+        "control_id": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}\\.L2-3\\.[0-9]+\\.[0-9]+$",
+          "description": "CMMC practice ID in the format [Family].L2-[NIST 800-171 ID]. Example: AC.L2-3.1.1"
+        },
+        "nist_id": {
+          "type": "string",
+          "pattern": "^3\\.[0-9]+\\.[0-9]+$",
+          "description": "NIST SP 800-171 Rev 2 requirement number. Example: 3.1.1"
+        },
+        "family": {
+          "type": "string",
+          "enum": ["AC", "AT", "AU", "CM", "IA", "IR", "MA", "MP", "PS", "PE", "RA", "CA", "SC", "SI"],
+          "description": "CMMC control family abbreviation."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["met", "not_met", "planned", "not_applicable"],
+          "description": "'met' = implemented and evidenced. 'not_met' = not implemented (SPRS deduction applies). 'planned' = POA&M item exists with target date. 'not_applicable' = formally excluded with documented rationale."
+        },
+        "maturity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Implementation maturity: 0=not implemented, 1=partially implemented (POA&M eligible), 2=implemented but not documented, 3=implemented and documented."
+        },
+        "sprs_weight": {
+          "type": "integer",
+          "enum": [1, 3, 5],
+          "description": "SPRS point weight per DoD Assessment Methodology v1.2.1. High=5, Medium=3, Low=1."
+        },
+        "poam": {
+          "type": "object",
+          "description": "Plan of Action & Milestones for controls not yet fully implemented.",
+          "additionalProperties": false,
+          "required": ["description", "target_date"],
+          "properties": {
+            "description": { "type": "string" },
+            "target_date": { "type": "string", "format": "date" },
+            "milestone": { "type": "string" },
+            "owner": { "type": "string" }
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "description": "Evidence objects supporting the control assessment.",
+          "items": {
+            "$ref": "#/definitions/evidence_object"
+          }
+        }
+      }
+    },
+    "evidence_object": {
+      "type": "object",
+      "description": "A single piece of evidence supporting a control assessment.",
+      "required": ["evidence_id", "type", "source", "collected_at"],
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this evidence object."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "log",
+            "screenshot",
+            "policy_document",
+            "configuration_export",
+            "user_attestation",
+            "device_inventory",
+            "job_traveler_audit",
+            "audit_report",
+            "vulnerability_scan",
+            "mfa_enforcement_report",
+            "access_control_list",
+            "training_record",
+            "incident_report",
+            "maintenance_log",
+            "physical_access_log"
+          ],
+          "description": "Evidence type. 'device_inventory' covers Intune/JAMF/CrowdStrike managed device registries. 'job_traveler_audit' covers physical CUI documents on shop floors (manufacturing-specific)."
+        },
+        "source": {
+          "type": "string",
+          "description": "System or process that produced the evidence. Examples: 'Okta', 'AzureAD', 'CrowdStrike', 'Splunk', 'Intune', 'JAMF', 'manual', 'physical_review'."
+        },
+        "collected_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp when the evidence was collected."
+        },
+        "detail": {
+          "type": "string",
+          "description": "Human-readable description of what this evidence demonstrates."
+        },
+        "fips_validated": {
+          "type": "boolean",
+          "description": "Whether the cryptographic implementation referenced by this evidence uses a FIPS 140-2 validated module. Applicable to evidence types involving encryption (configuration_export, mfa_enforcement_report, etc.)."
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of the evidence artifact, prefixed with 'sha256:'. Used for tamper detection."
+        },
+        "connector": {
+          "type": "string",
+          "description": "NemoClaw MCP connector that collected this evidence, if applicable."
+        }
+      }
+    }
+  }
+}
