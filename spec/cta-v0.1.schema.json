@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/07/schema",
-  "$id": "https://github.com/ThemeFR/cta/raw/main/spec/cta-v0.1.schema.json",
+  "$id": "https://github.com/ThemeFR/Compliance-Traceability-Artifact/raw/main/spec/cta-v0.1.schema.json",
   "title": "CTA Artifact",
   "description": "Compliance Traceability Artifact — portable, machine-readable CMMC Level 2 compliance proof. Published under CC BY 4.0. Schema spine: NIST SP 800-171 Rev 2.",
   "version": "0.1",
@@ -33,7 +33,7 @@
       "type": "string",
       "format": "uri",
       "description": "URI of the JSON Schema used to validate this artifact.",
-      "default": "https://github.com/ThemeFR/cta/raw/main/spec/cta-v0.1.schema.json"
+      "default": "https://github.com/ThemeFR/Compliance-Traceability-Artifact/raw/main/spec/cta-v0.1.schema.json"
     },
     "generated_at": {
       "type": "string",
@@ -203,14 +203,14 @@
     },
     "signature": {
       "type": "object",
-      "description": "Cryptographic signature over the artifact payload. Crypto-agile: supports classical SHA-256, post-quantum CRYSTALS-Dilithium (FIPS-204), and hybrid modes. When algorithm is CRYSTALS-Dilithium or hybrid, the cryptography block must also be present.",
+      "description": "Cryptographic signature over the artifact payload. Crypto-agile: supports classical SHA-256, post-quantum ML-DSA-87 / CRYSTALS-Dilithium (FIPS-204), and hybrid modes. When algorithm is ML-DSA-87 or hybrid, the cryptography block must also be present.",
       "required": ["algorithm", "value", "signed_at"],
       "additionalProperties": false,
       "properties": {
         "algorithm": {
           "type": "string",
-          "enum": ["SHA-256", "CRYSTALS-Dilithium", "hybrid"],
-          "description": "'SHA-256' = classical FIPS-compatible (default). 'CRYSTALS-Dilithium' = NIST PQC standard (FIPS-204), quantum-resistant. 'hybrid' = both algorithms applied; verifiers may use either — recommended during transition period."
+          "enum": ["SHA-256", "ML-DSA-87", "CRYSTALS-Dilithium", "hybrid"],
+          "description": "'SHA-256' = classical FIPS-compatible (default). 'ML-DSA-87' = NIST FIPS 204 finalized name, quantum-resistant (preferred). 'CRYSTALS-Dilithium' = pre-standardization alias for ML-DSA-87, retained for v0.1 backwards compatibility. 'hybrid' = both algorithms applied; verifiers may use either — recommended during transition period."
         },
         "value": {
           "type": "string",
@@ -229,14 +229,14 @@
     },
     "cryptography": {
       "type": "object",
-      "description": "Extended cryptographic metadata. Required when signature.algorithm is 'CRYSTALS-Dilithium' or 'hybrid'. Optional for SHA-256 signers. Enables quantum-secure signing via SEALSQ INeS PKI-as-a-Service and forward compatibility with CNSA 2.0 mandates.",
+      "description": "Extended cryptographic metadata. Required when signature.algorithm is 'ML-DSA-87', 'CRYSTALS-Dilithium', or 'hybrid'. Optional for SHA-256 signers. Supports signing via AWS KMS (Tier 2, today), GCP KMS (Tier 2 alt), or SEALSQ hardware (Tier 3, 2027). Forward-compatible with CNSA 2.0 mandates.",
       "additionalProperties": false,
       "required": ["signature_algorithm", "pqc_compliant", "trust_anchor"],
       "properties": {
         "signature_algorithm": {
           "type": "string",
-          "enum": ["SHA-256", "CRYSTALS-Dilithium", "hybrid"],
-          "description": "Algorithm used to produce the signature in the signature block. Must match signature.algorithm."
+          "enum": ["SHA-256", "ML-DSA-87", "CRYSTALS-Dilithium", "hybrid"],
+          "description": "Algorithm used to produce the signature in the signature block. Must match signature.algorithm. 'ML-DSA-87' is the preferred FIPS 204 name; 'CRYSTALS-Dilithium' is the v0.1 backwards-compatible alias."
         },
         "fips_validated": {
           "type": "boolean",
@@ -249,7 +249,7 @@
         },
         "pqc_compliant": {
           "type": "boolean",
-          "description": "Whether the signature uses a NIST-selected post-quantum algorithm (CRYSTALS-Dilithium = FIPS-204, CRYSTALS-Kyber = FIPS-203)."
+          "description": "Whether the signature uses a NIST-selected post-quantum algorithm (ML-DSA-87 / CRYSTALS-Dilithium = FIPS-204, ML-KEM / CRYSTALS-Kyber = FIPS-203)."
         },
         "cnsa_2_0_compliant": {
           "type": "boolean",
@@ -258,12 +258,12 @@
         "nist_pqc_standard": {
           "type": "string",
           "enum": ["FIPS-204", "FIPS-203"],
-          "description": "NIST PQC standard used. FIPS-204 = CRYSTALS-Dilithium (signatures). FIPS-203 = CRYSTALS-Kyber (key encapsulation)."
+          "description": "NIST PQC standard used. FIPS-204 = ML-DSA-87 / CRYSTALS-Dilithium (signatures). FIPS-203 = ML-KEM / CRYSTALS-Kyber (key encapsulation)."
         },
         "trust_anchor": {
           "type": "string",
-          "enum": ["software", "SEALSQ-QS7001", "SEALSQ-QVault-TPM", "SEALSQ-US-RoT"],
-          "description": "'software' = software-only signing (standard tier). 'SEALSQ-US-RoT' = SEALSQ U.S.-soil Root of Trust via INeS API (quantum-ready tier). 'SEALSQ-QS7001' = hardware secure element (high-assurance tier). 'SEALSQ-QVault-TPM' = hardware TPM (high-assurance tier)."
+          "enum": ["software", "AWS-KMS", "GCP-KMS", "SEALSQ-QS7001", "SEALSQ-QVault-TPM", "SEALSQ-US-RoT"],
+          "description": "'software' = software-only signing (standard tier). 'AWS-KMS' = AWS Key Management Service, FIPS 140-3 Level 3 validated HSM (Tier 1 standard and Tier 2 quantum-ready — today). 'GCP-KMS' = Google Cloud KMS (Tier 2 alt — preview). 'SEALSQ-US-RoT' = SEALSQ U.S.-soil Root of Trust via INeS API (Tier 3 hardware, 2027). 'SEALSQ-QS7001' = SEALSQ hardware secure element (Tier 3 high-assurance, 2027). 'SEALSQ-QVault-TPM' = SEALSQ hardware TPM (Tier 3 high-assurance, 2027)."
         },
         "hybrid_classical": {
           "type": "boolean",
@@ -412,6 +412,1310 @@
         "connector": {
           "type": "string",
           "description": "NemoClaw MCP connector that collected this evidence, if applicable."
+        },
+        "evidence_method": {
+          "type": "string",
+          "enum": ["documentary", "interview", "observation"],
+          "description": "CMMC Assessment Guide evidence method. documentary = documents/screenshots/exports reviewed by assessor. interview = verbal confirmation per Assessment Guide interview procedures. observation = direct inspection of system or process by assessor."
+        }
+      }
+    },
+    "evidence_log": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'log' evidence. AU.L2-3.3.1 requires audit logs to capture five specific data elements per the Assessment Guide.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "date_and_time_of_event",
+              "component_of_event",
+              "type_of_event",
+              "user_or_process_identity",
+              "outcome_of_event"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide required audit log content fields per AU.L2-3.3.1. Assessors verify each log entry captures these five elements: (1) date and time of event, (2) component where event occurred, (3) type of event, (4) user/process identity, (5) outcome of event."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide required audit protection evidence per AU.L2-3.3.2. Assessors verify three protection elements: who has access to audit system, what prevents unauthorized modification, and evidence the logging function is protected from disruption.",
+          "properties": {
+            "access_restricted_to": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "List of roles/accounts with access to the audit system."
+            },
+            "modification_prevention": {
+              "type": "string",
+              "description": "Mechanism preventing unauthorized modification of audit logs (e.g., WORM storage, role separation, immutable log forwarding)."
+            },
+            "logging_function_protected": {
+              "type": "boolean",
+              "description": "Whether the logging function itself is protected from disruption or tampering."
+            }
+          }
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly", "quarterly", "event_driven"],
+          "description": "Assessment Guide audit review frequency. Assessors verify that audit logs are reviewed on a defined schedule per AU.L2-3.3.5 and related controls."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for audit log review per Assessment Guide requirements. Assessors confirm a designated reviewer is assigned."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate this audit log evidence. Assessment Guide assessors cross-reference log evidence with configuration exports, interviews, and observations to confirm completeness."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope of audit logging — which systems, applications, and network segments are covered by this log source."
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this log evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Audit and Accountability, Section AU.L2-3.3.1'."
+        }
+      }
+    },
+    "evidence_access_control_list": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'access_control_list' evidence. AC.L2-3.1.5 requires assessors to verify least privilege and separation of duties in access control configurations.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "privileged_accounts",
+              "standard_accounts",
+              "role_definitions",
+              "separation_of_duties",
+              "least_privilege_enforcement"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide fields for access control evidence per AC.L2-3.1.5. Assessors verify: (1) privileged account inventory, (2) standard account inventory, (3) role definitions, (4) separation of duties implementation, (5) least privilege enforcement."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope — which systems or directories are covered by this access control list."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate access control list evidence. Assessment Guide assessors cross-reference ACLs with user directory exports and role assignment interviews."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "semi_annual", "annual", "event_driven"],
+          "description": "Assessment Guide required access review frequency. AC.L2-3.1.5 assessors verify access privileges are reviewed periodically to ensure least privilege is maintained."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for periodic access control reviews per Assessment Guide requirements."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for access control lists — least privilege applies to ACL modification authority",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to view or modify access control lists."
+            },
+            "modification_prevention": {
+              "type": "string",
+              "enum": ["role_gated", "dual_approval", "read_only_for_non_admin"],
+              "description": "Mechanism preventing unauthorized modification of ACL configurations."
+            },
+            "review_authority": {
+              "type": "string",
+              "description": "Role or body responsible for authorizing ACL changes."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this access control list evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Access Control, Section AC.L2-3.1.5'."
+        }
+      }
+    },
+    "evidence_device_inventory": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'device_inventory' evidence. CM.L2-3.4.1 requires assessors to verify baseline configurations are established and maintained for organizational systems. SI.L2-3.14.2 uses device inventory to verify endpoint protection coverage.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "device_name",
+              "device_type",
+              "operating_system",
+              "compliance_status",
+              "enrollment_status",
+              "last_check_in",
+              "baseline_configuration"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide fields for device inventory evidence. Assessors verify: device identification, type, OS, compliance status against baseline, enrollment in management platform, last check-in date, and baseline configuration applied."
+        },
+        "scope": {
+          "type": "object",
+          "description": "Assessment Guide scope of device inventory coverage.",
+          "properties": {
+            "total_devices": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of devices in the system boundary."
+            },
+            "managed_devices": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of devices enrolled in management platform."
+            },
+            "unmanaged_devices": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of devices not enrolled — Assessment Guide requires documentation of unmanaged devices."
+            }
+          }
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate device inventory evidence. Assessment Guide assessors cross-reference device inventory with configuration exports and physical observation."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly", "quarterly", "event_driven"],
+          "description": "Assessment Guide required device inventory review frequency. CM.L2-3.4.1 assessors verify baseline configurations are reviewed and updated on a defined schedule."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for device inventory and baseline configuration reviews per Assessment Guide requirements."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for device inventory and baseline records",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access device inventory records."
+            },
+            "modification_prevention": {
+              "type": "string",
+              "enum": ["change_controlled", "read_only_export", "hash_verified"],
+              "description": "Mechanism preventing unauthorized modification of device inventory baselines."
+            },
+            "baseline_integrity_check": {
+              "type": "string",
+              "description": "Method used to verify integrity of device baseline records."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this device inventory evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Configuration Management, Section CM.L2-3.4.1'."
+        }
+      }
+    },
+    "evidence_configuration_export": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'configuration_export' evidence. Assessors verify system configuration evidence demonstrates the control requirement is implemented in the system settings, not just documented in policy.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "system_name",
+              "configuration_setting",
+              "expected_value",
+              "actual_value",
+              "enforcement_mechanism"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide fields for configuration evidence. Assessors verify: (1) system name, (2) specific configuration setting, (3) expected compliant value, (4) actual observed value, (5) enforcement mechanism preventing drift."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope description — which systems, boundaries, or enclaves this configuration export covers."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate this configuration export. Assessment Guide assessors verify configuration evidence against interviews, observations, and policy documents."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly", "quarterly", "event_driven"],
+          "description": "Assessment Guide required configuration review frequency. Assessors verify configuration baselines are reviewed periodically to detect unauthorized changes or drift."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for configuration review and change approval per Assessment Guide requirements."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for configuration baseline integrity",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access configuration baseline records."
+            },
+            "modification_prevention": {
+              "type": "string",
+              "enum": ["read_only_storage", "version_controlled", "hash_verified"],
+              "description": "Mechanism preventing unauthorized modification of configuration baselines."
+            },
+            "integrity_verification_method": {
+              "type": "string",
+              "description": "Method used to verify integrity of stored configuration baseline."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this configuration export evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Access Control, Section AC.L2-3.1.1'."
+        }
+      }
+    },
+    "evidence_policy_document": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'policy_document' evidence. Assessors verify policy documents are approved, current, and address the specific control requirements. Applies to IR.L2-3.6.1 (incident response plan), CA.L2-3.12.4 (system security plan), and other policy-driven controls.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "document_title",
+              "version",
+              "approval_authority",
+              "approval_date",
+              "review_date",
+              "distribution_scope",
+              "control_coverage"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide fields for policy document evidence. Assessors verify: (1) document title, (2) version number, (3) approval authority, (4) approval date, (5) last review date, (6) distribution scope, (7) which controls the document addresses."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["annual", "semi_annual", "quarterly", "event_driven"],
+          "description": "Assessment Guide required policy review frequency. Assessors verify policies are reviewed and updated on a defined schedule."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for policy review and approval per Assessment Guide requirements."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope — which organizational units, systems, or processes the policy covers."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate policy document evidence. Assessment Guide assessors verify policies are implemented in practice via configuration exports and interviews."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for policy documents including SSP and IRP version control",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access controlled policy documents."
+            },
+            "version_control": {
+              "type": "string",
+              "enum": ["formal_version_control", "document_management_system", "manual"],
+              "description": "Version control method applied to this policy document."
+            },
+            "distribution_control": {
+              "type": "string",
+              "description": "Controls governing distribution and access to policy document copies."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this policy document evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Incident Response, Section IR.L2-3.6.1'."
+        }
+      }
+    },
+    "evidence_job_traveler_audit": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'job_traveler_audit' evidence. MP.L2-3.8.1 requires assessors to verify physical CUI media is properly marked, stored, and controlled. Manufacturing-specific: covers job traveler packages, technical drawings, and shop floor documents containing CUI.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "cui_marking_applied",
+              "secure_storage_location",
+              "access_control_mechanism",
+              "distribution_tracking",
+              "destruction_procedure"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide fields for physical CUI media protection per MP.L2-3.8.1. Assessors verify: (1) CUI markings applied per NARA guidelines, (2) secure storage location, (3) access control mechanism for physical documents, (4) distribution tracking, (5) destruction procedure for CUI media."
+        },
+        "scope": {
+          "type": "object",
+          "description": "Assessment Guide scope of physical CUI media audit.",
+          "properties": {
+            "documents_reviewed": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of physical CUI documents/packages reviewed in the audit."
+            },
+            "locations_inspected": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Physical locations inspected during the audit (e.g., shop floor, CNC area, secure storage room)."
+            },
+            "findings": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of non-conformances found during the audit."
+            }
+          }
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate job traveler audit evidence. Assessment Guide assessors cross-reference physical audits with policy documents and training records."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["weekly", "monthly", "quarterly", "semi_annual", "event_driven"],
+          "description": "Assessment Guide required physical CUI audit frequency. MP.L2-3.8.1 assessors verify CUI media handling is audited on a defined schedule."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for physical CUI media audits per Assessment Guide requirements."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for physical CUI media including chain of custody and tamper evidence",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or personnel authorized to access physical CUI documents."
+            },
+            "tamper_evidence": {
+              "type": "string",
+              "enum": ["sealed_envelope", "logged_access", "badge_reader_controlled"],
+              "description": "Tamper-evidence mechanism applied to physical CUI storage."
+            },
+            "chain_of_custody": {
+              "type": "string",
+              "description": "Chain of custody tracking method for physical CUI media."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this job traveler audit evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Media Protection, Section MP.L2-3.8.1'."
+        }
+      }
+    },
+    "evidence_mfa_enforcement_report": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'mfa_enforcement_report' evidence. IA.L2-3.5.3 requires three evidence categories per the Assessment Guide: system configuration, user enrollment records, and bypass exception logs.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "mfa_system_configuration",
+              "user_enrollment_status",
+              "bypass_exception_log",
+              "authenticator_type",
+              "privileged_account_enforcement"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide required MFA evidence fields per IA.L2-3.5.3. Assessors verify: (1) MFA system configuration, (2) user enrollment status for all accounts, (3) bypass exception logs documenting any temporary exemptions, (4) authenticator types in use, (5) privileged account enforcement level."
+        },
+        "scope": {
+          "type": "object",
+          "description": "Assessment Guide scope of MFA enforcement per IA.L2-3.5.3. Assessors verify enrollment coverage and any bypass exceptions.",
+          "properties": {
+            "total_users": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of user accounts in scope for MFA enforcement."
+            },
+            "enrolled_users": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of users with MFA successfully enrolled."
+            },
+            "bypass_exceptions": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of active MFA bypass exceptions. Assessment Guide requires documentation and periodic review of all exceptions."
+            },
+            "bypass_justifications": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Documented justifications for each active MFA bypass exception."
+            }
+          }
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate MFA enforcement. Assessment Guide assessors cross-reference MFA reports with user directory exports and interview evidence."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "semi_annual", "annual", "event_driven"],
+          "description": "Assessment Guide required MFA enrollment review frequency. IA.L2-3.5.3 assessors verify MFA enrollment and bypass exceptions are reviewed periodically."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for MFA enrollment reviews and bypass exception approvals per Assessment Guide requirements."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for MFA enforcement records and bypass exception registry",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access MFA enforcement reports and bypass logs."
+            },
+            "bypass_exception_controls": {
+              "type": "string",
+              "description": "Controls governing access to and modification of bypass exception registry."
+            },
+            "audit_trail_protected": {
+              "type": "boolean",
+              "description": "Whether the MFA audit trail is protected from modification or deletion."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this MFA enforcement report evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Identification and Authentication, Section IA.L2-3.5.3'."
+        }
+      }
+    },
+    "evidence_vulnerability_scan": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'vulnerability_scan' evidence. RA.L2-3.11.2 requires assessors to verify vulnerability scanning covers the system boundary. SI.L2-3.14.1 requires evidence of flaw identification and remediation.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "scan_date",
+              "scanner_tool",
+              "devices_scanned",
+              "critical_findings",
+              "high_findings",
+              "medium_findings",
+              "low_findings",
+              "remediation_status"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide fields for vulnerability scan evidence. Assessors verify: scan date, scanner tool used, number of devices scanned, finding counts by severity, and remediation status."
+        },
+        "scope": {
+          "type": "object",
+          "description": "Assessment Guide scope of vulnerability scanning coverage.",
+          "properties": {
+            "total_devices_in_boundary": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total devices within the assessment boundary."
+            },
+            "devices_scanned": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Devices actually scanned in this scan run."
+            },
+            "scan_coverage_percent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Percentage of boundary devices covered by this scan."
+            }
+          }
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly", "quarterly", "event_driven"],
+          "description": "Assessment Guide required vulnerability scan frequency. RA.L2-3.11.2 assessors verify scans are performed on a defined schedule."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate vulnerability scan evidence. Assessment Guide assessors cross-reference scan results with patch management records and remediation tickets."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for reviewing vulnerability scan results and prioritizing remediation per Assessment Guide requirements."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for vulnerability scan results and remediation tracking integrity",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access vulnerability scan results."
+            },
+            "result_integrity_protected": {
+              "type": "boolean",
+              "description": "Whether vulnerability scan results are protected from modification after capture."
+            },
+            "remediation_tracking_protected": {
+              "type": "string",
+              "description": "Controls ensuring remediation tracking records are not modified retroactively."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this vulnerability scan evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Risk Assessment, Section RA.L2-3.11.2'."
+        }
+      }
+    },
+    "evidence_screenshot": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'screenshot' evidence. Used for AT.L2-3.2.x training completion, AC configuration state verification, and CM baseline configuration screenshots.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "captured_system",
+              "captured_date",
+              "captured_by",
+              "control_demonstrated",
+              "capture_method"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide required fields for screenshot evidence. Assessors verify: (1) which system was captured, (2) date/time of capture, (3) who captured it, (4) which control requirement the screenshot demonstrates, (5) capture method (manual, automated, screen recording)."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope — which system, application, or process boundary is captured in this screenshot."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["on_demand", "monthly", "quarterly", "annual", "event_driven"],
+          "description": "Assessment Guide review frequency for screenshot evidence. Typically refreshed on demand when controls change or on assessment cycles."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for verifying screenshot evidence accuracy and currency per Assessment Guide requirements."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate this screenshot. Assessment Guide assessors cross-reference screenshots with configuration exports and interview confirmation."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for screenshot integrity and capture method logging per AT.L2-3.2.x",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access screenshot evidence files."
+            },
+            "capture_method_logged": {
+              "type": "boolean",
+              "description": "Whether the screenshot capture method and tool are logged for assessor verification."
+            },
+            "integrity_hash_present": {
+              "type": "boolean",
+              "description": "Whether a hash is computed on the screenshot file to detect post-capture modification."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this screenshot evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Awareness and Training, Section AT.L2-3.2.1'."
+        }
+      }
+    },
+    "evidence_user_attestation": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'user_attestation' evidence. AT.L2-3.2.x requires documented user acknowledgment of security policies. Also used for PS.L2-3.9.x personnel agreements and PE.L2-3.10.x physical access acknowledgments.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "attesting_user",
+              "attestation_date",
+              "policy_version",
+              "acknowledgment_type",
+              "supervisor_witness"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide required fields for user attestation evidence. Assessors verify: (1) identity of attesting user, (2) date attestation was signed, (3) version of policy acknowledged, (4) type of acknowledgment (e.g., AUP, NDA, security training), (5) supervisor or witness identity where required."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope — which policy, agreement, or training content was attested to."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["annual", "on_role_change", "on_policy_update", "event_driven"],
+          "description": "Assessment Guide required attestation renewal frequency. AT.L2-3.2.1 assessors verify users re-attest on a defined schedule, on role changes, or when policies are updated."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for tracking attestation completion and following up on overdue attestations per Assessment Guide requirements."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values that corroborate attestation evidence. Assessment Guide assessors cross-reference attestation records with training completion records and personnel files."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for attestation records — signed, non-repudiable, and access-controlled per AT.L2-3.2.x and PS.L2-3.9.x",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access user attestation records."
+            },
+            "non_repudiation": {
+              "type": "string",
+              "enum": ["digital_signature", "witnessed_signature", "timestamped_acknowledgment"],
+              "description": "Non-repudiation mechanism ensuring attestation cannot be denied after the fact."
+            },
+            "record_immutability": {
+              "type": "boolean",
+              "description": "Whether completed attestation records are immutable after submission."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this user attestation evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Awareness and Training, Section AT.L2-3.2.1'."
+        }
+      }
+    },
+    "evidence_audit_report": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'audit_report' evidence. CA.L2-3.12.1 requires periodic security assessments; RA.L2-3.11.x uses audit reports as risk assessment evidence. Assessors use audit reports to verify that the organization evaluates controls and remediates findings.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "report_date",
+              "auditor",
+              "scope_boundary",
+              "findings_count",
+              "recommendations",
+              "remediation_status"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide required fields for audit report evidence. Assessors verify: (1) report date, (2) auditor identity/credentials, (3) systems and processes within scope, (4) total findings count by severity, (5) recommendations made, (6) remediation status of prior findings."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope boundary — which systems, processes, and control families were covered by this audit."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["annual", "semi_annual", "quarterly", "event_driven"],
+          "description": "Assessment Guide required audit frequency. CA.L2-3.12.1 assessors verify security assessments are conducted periodically, not just at certification time."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for reviewing audit findings and tracking remediation per Assessment Guide requirements."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values corroborating this audit report. Assessment Guide assessors cross-reference audit reports with POA&M items, remediation tickets, and system security plans."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for audit report access control and version tracking per CA.L2-3.12.1",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access audit reports and assessment findings."
+            },
+            "version_control": {
+              "type": "string",
+              "enum": ["formal_version_control", "document_management_system", "manual"],
+              "description": "Version control method applied to audit reports."
+            },
+            "distribution_control": {
+              "type": "string",
+              "description": "Controls governing distribution of audit findings and sensitive assessment results."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this audit report evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Certification, Accreditation, and Security Assessments, Section CA.L2-3.12.1'."
+        }
+      }
+    },
+    "evidence_training_record": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'training_record' evidence. AT.L2-3.2.1 requires security awareness training for all personnel; AT.L2-3.2.2 requires role-based training for those with privileged access or security responsibilities.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "trainee",
+              "training_title",
+              "completion_date",
+              "training_method",
+              "passing_score",
+              "role_applicability"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide required fields for training record evidence. Assessors verify: (1) trainee identity, (2) training course or module title, (3) completion date, (4) delivery method (LMS, instructor-led, self-study), (5) passing score or completion threshold, (6) which role or all-personnel requirement this satisfies."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope — which personnel population this training record covers (e.g., all employees, privileged users, new hires)."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["annual", "on_hire", "on_role_change", "quarterly", "event_driven"],
+          "description": "Assessment Guide required training renewal frequency. AT.L2-3.2.1 assessors verify personnel complete training at hire and at minimum annually thereafter."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for tracking training completion rates and following up on overdue training per Assessment Guide requirements."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values corroborating training records. Assessment Guide assessors cross-reference training completion records with user attestation records and HR personnel files."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for training completion records — access-controlled and immutable per AT.L2-3.2.1",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access training completion records."
+            },
+            "record_immutability": {
+              "type": "string",
+              "enum": ["lms_controlled", "read_only_export", "supervisor_locked"],
+              "description": "Controls ensuring training completion records are not retroactively modified."
+            },
+            "completeness_verification": {
+              "type": "boolean",
+              "description": "Whether training records are verified for completeness against the full personnel roster."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this training record evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Awareness and Training, Section AT.L2-3.2.1'."
+        }
+      }
+    },
+    "evidence_incident_report": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'incident_report' evidence. IR.L2-3.6.1 requires documented incident response capability; IR.L2-3.6.2 requires tracking and reporting incidents to authorities (US-CERT, DIBNet). Assessors verify incident reports demonstrate the full response lifecycle.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "incident_id",
+              "detection_date",
+              "containment_date",
+              "resolution_date",
+              "incident_type",
+              "affected_systems",
+              "reporting_status"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide required fields for incident report evidence. Assessors verify: (1) unique incident identifier, (2) detection date and time, (3) containment date, (4) resolution/closure date, (5) incident type (malware, unauthorized access, data spillage, etc.), (6) list of affected systems, (7) reporting status to DoD/US-CERT per IR.L2-3.6.2."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope — which systems and CUI categories were potentially affected by this incident."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["per_incident", "monthly", "quarterly", "annual"],
+          "description": "Assessment Guide required incident review frequency. IR.L2-3.6.2 assessors verify incidents are reviewed after each occurrence and trends are analyzed periodically."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for incident review, lessons-learned, and DoD reporting per Assessment Guide requirements."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values corroborating incident reports. Assessment Guide assessors cross-reference incident reports with audit logs, configuration exports, and IRP policy documents."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for incident records — tamper-evident controls and access restrictions per IR.L2-3.6.2",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access incident report records."
+            },
+            "tamper_evidence": {
+              "type": "string",
+              "enum": ["immutable_logging", "hash_verified", "access_controlled_storage"],
+              "description": "Tamper-evidence mechanism protecting incident record integrity."
+            },
+            "retention_enforced": {
+              "type": "boolean",
+              "description": "Whether incident records are subject to enforced retention controls."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this incident report evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Incident Response, Section IR.L2-3.6.2'."
+        }
+      }
+    },
+    "evidence_maintenance_log": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'maintenance_log' evidence. MA.L2-3.7.1 requires maintenance to be performed only by authorized individuals. MA.L2-3.7.2 requires controls on tools, techniques, and mechanisms used for maintenance. Assessors use maintenance logs to verify controlled, authorized maintenance activities.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "maintenance_date",
+              "technician",
+              "system_affected",
+              "maintenance_type",
+              "authorization_reference",
+              "completion_status"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide required fields for maintenance log evidence. Assessors verify: (1) date and time of maintenance activity, (2) technician identity and authorization status, (3) which system or component was maintained, (4) maintenance type (preventive, corrective, emergency, remote), (5) authorization reference (ticket number, change order), (6) completion status and any follow-up actions."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope — which systems and facilities are covered by this maintenance program."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["per_activity", "monthly", "quarterly", "annual"],
+          "description": "Assessment Guide required maintenance log review frequency. MA.L2-3.7.x assessors verify maintenance records are reviewed to confirm only authorized personnel performed maintenance."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for authorizing maintenance activities and reviewing maintenance logs per Assessment Guide requirements."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values corroborating maintenance log evidence. Assessment Guide assessors cross-reference maintenance logs with access control lists, change management tickets, and physical access logs."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for maintenance records — access-controlled and audit-trailed per MA.L2-3.7.1",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access maintenance log records."
+            },
+            "modification_prevention": {
+              "type": "string",
+              "enum": ["read_only_after_close", "audit_trail_enforced", "supervisor_approval"],
+              "description": "Controls preventing retroactive modification of completed maintenance records."
+            },
+            "audit_trail_protected": {
+              "type": "boolean",
+              "description": "Whether maintenance activity audit trail is protected from unauthorized modification."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this maintenance log evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Maintenance, Section MA.L2-3.7.1'."
+        }
+      }
+    },
+    "evidence_physical_access_log": {
+      "type": "object",
+      "description": "Per-type Assessment Guide alignment for 'physical_access_log' evidence. PE.L2-3.10.1 requires authorizing, monitoring, and controlling physical access to organizational systems. PE.L2-3.10.3 requires escorting visitors and monitoring visitor activity. Assessors verify physical access logs demonstrate controlled entry to CUI areas.",
+      "properties": {
+        "assessment_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "entry_date",
+              "individual_identity",
+              "access_area",
+              "authorization_basis",
+              "escort_required",
+              "escort_identity"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Assessment Guide required fields for physical access log evidence. Assessors verify: (1) date and time of physical entry, (2) identity of individual entering (name, badge ID), (3) controlled area accessed (server room, CUI processing area), (4) authorization basis (access list, badge level, visitor approval), (5) whether escort was required, (6) escort identity when applicable (PE.L2-3.10.3)."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Assessment Guide scope — which physical locations and CUI-processing areas are covered by this physical access log."
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly", "quarterly", "event_driven"],
+          "description": "Assessment Guide required physical access log review frequency. PE.L2-3.10.1 assessors verify that physical access logs are reviewed to detect unauthorized entry attempts."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Role or individual responsible for reviewing physical access logs and investigating anomalous entry events per Assessment Guide requirements."
+        },
+        "corroborating_evidence": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "description": "References to other evidence_id values corroborating physical access log evidence. Assessment Guide assessors cross-reference physical access logs with access control lists, visitor logs, and maintenance logs."
+        },
+        "maturity_indicators": {
+          "type": "object",
+          "description": "Assessment guide observable scoring indicators — maps CMMC assessment methodology criteria to evidence characteristics that distinguish MET from NOT MET findings under DoD Assessment Methodology v1.2.1",
+          "properties": {
+            "met_criteria": {
+              "type": "string",
+              "description": "Observable characteristics that satisfy the assessment guide requirement"
+            },
+            "not_met_criteria": {
+              "type": "string",
+              "description": "Observable gaps that indicate a NOT MET finding under assessment guide criteria"
+            },
+            "scoring_weight": {
+              "type": "string",
+              "enum": ["critical", "significant", "moderate"],
+              "description": "Relative impact on SPRS score if this evidence type is absent or insufficient"
+            }
+          }
+        },
+        "protection_controls": {
+          "type": "object",
+          "description": "Assessment Guide protection requirements for physical access logs — tamper-resistant controls and access restrictions per PE.L2-3.10.1",
+          "properties": {
+            "access_restricted_to": {
+              "type": "string",
+              "description": "Roles or accounts authorized to access physical access log records."
+            },
+            "tamper_resistance": {
+              "type": "string",
+              "enum": ["write_once_storage", "badge_system_immutable", "supervised_access_only"],
+              "description": "Tamper-resistance mechanism protecting physical access log records."
+            },
+            "log_integrity_verified": {
+              "type": "boolean",
+              "description": "Whether physical access log integrity is periodically verified against tampering."
+            }
+          }
+        },
+        "assessment_guide_reference": {
+          "type": "string",
+          "description": "CMMC Assessment Guide v2.0 section reference for this physical access log evidence. Format: 'CMMC Assessment Guide v2.0, [Control Family], [Section Reference]'. Example: 'CMMC Assessment Guide v2.0, Physical Protection, Section PE.L2-3.10.1'."
         }
       }
     }
