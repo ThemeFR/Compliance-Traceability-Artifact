@@ -1,0 +1,9 @@
+{
+  "name": "cta-schema-tooling",
+  "version": "0.1.0",
+  "description": "CTA schema iteration tooling — validator and coverage metric",
+  "private": true,
+  "dependencies": {
+    "ajv": "^8.17.1"
+  }
+}

@@ -1231,3 +1231,108 @@ ServiceNow, KnowBe4, SharePoint, Genetec, HR, Facilities, physical_review
 4. Convert 4 not_met controls to "planned" with POA&M milestones and owners
 5. Add SPRS deduction details for the 2 existing "planned" SI controls
 ---
+
+## LOOP 5 — Schema Gap Fixes (Experiments 137–144)
+
+---
+Experiment 137 | 2026-03-28
+Gap addressed: 1
+File edited: spec/cta-v0.1.schema.json
+Change: Updated shared_account_violation description to reflect correct weight calculation. AC.L2-3.1.1 (5) + IA.L2-3.5.1 (5) + AU.L2-3.3.2 (5) = 15 points, not 11. Description now states combined SPRS impact of 15 points and breach from 100→85 (below C3PAO 88 threshold). Example weights already correct (all 5).
+Validator: PASS
+Decision: KEPT
+
+---
+Experiment 138 | 2026-03-28
+Gap addressed: 2a
+File edited: examples/sprs-output-example.json
+Change: Added evidence_method to 17 original evidence objects that were missing it. 16 set to "documentary", 1 (MP.L2-3.8.1 physical_review) set to "observation". Prerequisite for making evidence_method required in schema.
+Validator: PASS
+Decision: KEPT
+
+---
+Experiment 139 | 2026-03-28
+Gap addressed: 2b
+File edited: spec/cta-v0.1.schema.json
+Change: Added "evidence_method" to the required array of evidence_object definition. Now required: ["evidence_id", "type", "source", "collected_at", "evidence_method"]. Assessors can always determine examination method.
+Validator: PASS
+Decision: KEPT
+
+---
+Experiment 140 | 2026-03-28
+Gap addressed: 3a
+File edited: spec/cta-v0.1.schema.json
+Change: Added poa_and_m object property to control_assessment definition with properties: target_close_date (date), responsible_owner (string), remediation_steps (array of strings), estimated_effort_weeks (number). Optional — not conditionally required on status.
+Validator: PASS
+Decision: KEPT
+
+---
+Experiment 141 | 2026-03-28
+Gap addressed: 3b
+File edited: examples/sprs-output-example.json
+Change: Added poa_and_m to all 4 NOT MET controls with realistic data: CM.L2-3.4.8 (target 2026-05-15, IT Director, 3 weeks, 5 steps), IR.L2-3.6.3 (2026-04-30, 1 week, 4 steps), MA.L2-3.7.4 (2026-04-15, 1 week, 3 steps), SC.L2-3.13.14 (2026-04-08, Compliance Lead, 0.5 weeks, 3 steps).
+Validator: PASS
+Decision: KEPT
+
+---
+Experiment 142 | 2026-03-28
+Gap addressed: 4a
+File edited: spec/cta-v0.1.schema.json
+Change: Added coverage_percentage property (type: number, min 0, max 100) to evidence_object definition. Documents what percentage of in-scope systems are covered by evidence. Addresses partial coverage gap (e.g., CNC machines not under EDR management).
+Validator: PASS
+Decision: KEPT
+
+---
+Experiment 143 | 2026-03-28
+Gap addressed: 4b
+File edited: examples/sprs-output-example.json
+Change: Added coverage_percentage: 78 to evidence objects in SI.L2-3.14.1 and SI.L2-3.14.2. Reflects 52 of 67 endpoints covered (3 legacy CNC workstations excluded from CrowdStrike coverage).
+Validator: PASS
+Decision: KEPT
+
+---
+Experiment 144 | 2026-03-28
+Gap addressed: 5
+File edited: spec/cta-v0.1.schema.json
+Change: Added assessment_blocker boolean property to control_assessment definition. Description: "True if this control's NOT MET status blocks C3PAO assessment eligibility regardless of SPRS score." Not added to any MET controls in the example per program instructions.
+Validator: PASS
+Decision: KEPT
+
+---
+## LOOP 5 SUMMARY
+
+**Loop completed: 2026-03-28**
+**Experiments (Loop 5): 8 total (Experiments 137–144)**
+- Kept: 8
+- Discarded: 0
+- Validator failures: 0
+
+**All 5 gaps addressed:**
+
+| Gap | Description | Experiments | Status |
+|-----|-------------|-------------|--------|
+| 1 | Invariant weight correction (15 not 11) | 137 | Fixed |
+| 2 | evidence_method required on all evidence | 138–139 | Fixed (17 objects backfilled + schema required) |
+| 3 | poa_and_m for NOT MET controls | 140–141 | Added (schema + 4 controls populated) |
+| 4 | coverage_percentage for partial coverage | 142–143 | Added (schema + 2 SI controls at 78%) |
+| 5 | assessment_blocker flag | 144 | Added to schema |
+
+**Final metrics:**
+- example-coverage.js: 110/110 controls, SPRS 100
+- assessment-coverage.js: 110/110 coverage, depth avg 8.71 (min 1, max 9), type defs 15/15
+- Validator: PASS
+
+**Schema changes this loop:**
+- shared_account_violation description corrected (weight 15, C3PAO breach)
+- evidence_method now required on all evidence objects
+- poa_and_m property added to control_assessment
+- coverage_percentage added to evidence_object
+- assessment_blocker added to control_assessment
+
+**Suggested experiments for Loop 6:**
+1. Add if/then/else to conditionally require poa_and_m when status="not_met"
+2. Add connector field to all 93 new evidence objects for parity with originals
+3. Add fips_validated and hash fields to all 93 new evidence objects
+4. Add second corroborating evidence objects to weight-5 controls
+5. Add assessment_blocker: false to all MET controls in example for explicitness
+---

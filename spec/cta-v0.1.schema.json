@@ -131,7 +131,7 @@
       "properties": {
         "shared_account_violation": {
           "type": "object",
-          "description": "Fires when multiple users are detected authenticating with the same credential. Automatically sets maturity to 0 for AC.L2-3.1.1, IA.L2-3.5.1, and AU.L2-3.3.2.",
+          "description": "Fires when multiple users are detected authenticating with the same credential. When detected, maturity auto-resets to 0 for AC.L2-3.1.1 (weight 5), IA.L2-3.5.1 (weight 5), AU.L2-3.3.2 (weight 5). Combined SPRS impact: 15 points. Breach threshold from SPRS 100: drops to 85, below C3PAO eligibility threshold of 88.",
           "additionalProperties": false,
           "properties": {
             "detected": {
@@ -346,6 +346,21 @@
             "owner": { "type": "string" }
           }
         },
+        "assessment_blocker": {
+          "type": "boolean",
+          "description": "True if this control's NOT MET status blocks C3PAO assessment eligibility regardless of SPRS score. Controls with documented DoD assessment prerequisite requirements (e.g., CA.L2-3.12.4 SSP) should set this flag when not_met."
+        },
+        "poa_and_m": {
+          "type": "object",
+          "description": "Structured Plan of Action & Milestones for NOT MET controls. Provides assessors with remediation timeline, ownership, and effort estimate.",
+          "additionalProperties": false,
+          "properties": {
+            "target_close_date": { "type": "string", "format": "date", "description": "Target date for remediation completion." },
+            "responsible_owner": { "type": "string", "description": "Named individual accountable for remediation." },
+            "remediation_steps": { "type": "array", "items": { "type": "string" }, "description": "Ordered list of remediation actions." },
+            "estimated_effort_weeks": { "type": "number", "minimum": 0, "description": "Estimated effort in weeks to close the gap." }
+          }
+        },
         "evidence": {
           "type": "array",
           "description": "Evidence objects supporting the control assessment.",
@@ -358,7 +373,7 @@
     "evidence_object": {
       "type": "object",
       "description": "A single piece of evidence supporting a control assessment.",
-      "required": ["evidence_id", "type", "source", "collected_at"],
+      "required": ["evidence_id", "type", "source", "collected_at", "evidence_method"],
       "additionalProperties": false,
       "properties": {
         "evidence_id": {
@@ -417,6 +432,12 @@
           "type": "string",
           "enum": ["documentary", "interview", "observation"],
           "description": "CMMC Assessment Guide evidence method. documentary = documents/screenshots/exports reviewed by assessor. interview = verbal confirmation per Assessment Guide interview procedures. observation = direct inspection of system or process by assessor."
+        },
+        "coverage_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage of in-scope systems covered by this evidence. Used to document partial coverage gaps (e.g., 78% means 52 of 67 endpoints covered, with remaining systems on POA&M for remediation)."
         }
       }
     },

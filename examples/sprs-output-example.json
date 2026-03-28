@@ -48,7 +48,8 @@
           "detail": "Azure AD user directory export confirming all 67 accounts are individually named, no shared accounts. Conditional Access policies enforce device compliance before system access.",
           "fips_validated": true,
           "hash": "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
-          "connector": "cta-azuread-connector-v1"
+          "connector": "cta-azuread-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -122,7 +123,8 @@
           "detail": "Role-based access control export from Azure AD. 4 privileged admin accounts separated from 63 standard user accounts. Admin accounts require PIM justification for elevation.",
           "fips_validated": true,
           "hash": "sha256:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3",
-          "connector": "cta-azuread-connector-v1"
+          "connector": "cta-azuread-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -268,7 +270,8 @@
           "detail": "VPN configuration export confirming TLS 1.3 enforced on all remote access sessions. Split tunneling disabled. All remote traffic routed through managed access point.",
           "fips_validated": true,
           "hash": "sha256:c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
-          "connector": "cta-azuread-connector-v1"
+          "connector": "cta-azuread-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -504,7 +507,8 @@
           "detail": "Splunk audit log retention policy confirmation. Logs retained 365 days minimum. All system events (login, file access, privilege escalation, network egress) captured. Log integrity protection enabled.",
           "fips_validated": false,
           "hash": "sha256:d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5",
-          "connector": "cta-splunk-connector-v1"
+          "connector": "cta-splunk-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -524,7 +528,8 @@
           "detail": "Individual user attribution confirmed in all audit log entries. Login events, file access events, and admin actions all carry unique user identifiers. Shared account cnc_shared deprovisioned 2026-03-10 — zero logins since.",
           "fips_validated": false,
           "hash": "sha256:e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6",
-          "connector": "cta-splunk-connector-v1"
+          "connector": "cta-splunk-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -723,7 +728,8 @@
           "collected_at": "2026-03-18T14:00:00Z",
           "detail": "System Security Plan (SSP) v1.0 — Webb Precision Manufacturing. Approved by Marcus Webb (CEO) 2026-03-18. Documents system boundary, network topology, all 110 control implementations, POA&M items, and connections to Lockheed Martin supplier portal. Stored in version-controlled SharePoint with access controls.",
           "fips_validated": false,
-          "hash": "sha256:a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4"
+          "hash": "sha256:a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -743,7 +749,8 @@
           "detail": "Intune managed device inventory export. 47 devices registered (31 workstations, 12 laptops, 4 servers). All devices enrolled with compliance policy enforced. 2 personal devices blocked — not enrolled.",
           "fips_validated": false,
           "hash": "sha256:f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1",
-          "connector": "cta-intune-connector-v1"
+          "connector": "cta-intune-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -866,7 +873,19 @@
         "description": "Deny-by-exception (allowlisting) not fully implemented. Current state: CrowdStrike blocks known-bad software but does not enforce a formal application allowlist. POA&M item: implement Intune-managed allowlist by Q3 2026.",
         "target_date": "2026-09-30"
       },
-      "evidence": []
+      "evidence": [],
+      "poa_and_m": {
+        "target_close_date": "2026-05-15",
+        "responsible_owner": "IT Director",
+        "remediation_steps": [
+          "Evaluate application allowlist tools (Intune vs CrowdStrike)",
+          "Define baseline allowlist from approved software inventory",
+          "Deploy allowlist policy to pilot group (10 devices)",
+          "Validate no workflow disruption over 2-week pilot",
+          "Roll out to all 67 endpoints"
+        ],
+        "estimated_effort_weeks": 3
+      }
     },
     {
       "control_id": "CM.L2-3.4.9",
@@ -902,7 +921,8 @@
           "detail": "Okta user directory export. 67 unique user accounts, 4 service accounts, 0 shared accounts. All accounts tied to named individuals with manager approval workflow for provisioning.",
           "fips_validated": true,
           "hash": "sha256:a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3",
-          "connector": "cta-okta-connector-v1"
+          "connector": "cta-okta-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -922,7 +942,8 @@
           "detail": "Okta authentication policy report confirming authentication required for all system access. Zero unauthenticated access endpoints. Password reset requires identity verification.",
           "fips_validated": true,
           "hash": "sha256:b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4",
-          "connector": "cta-okta-connector-v1"
+          "connector": "cta-okta-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -942,7 +963,8 @@
           "detail": "Okta MFA enforcement report. Authenticator app (TOTP) enforced for all 67 users. Hardware key (FIDO2/YubiKey) enforced for 4 privileged admin accounts. Zero MFA bypass exceptions active. 100% enrollment.",
           "fips_validated": true,
           "hash": "sha256:c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5",
-          "connector": "cta-okta-connector-v1"
+          "connector": "cta-okta-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -1105,7 +1127,8 @@
           "collected_at": "2026-03-20T09:00:00Z",
           "detail": "Incident Response Plan v2.1 — approved by Marcus Webb (CEO) 2026-03-20. Covers preparation, detection, analysis, containment, eradication, recovery. Integrates CrowdStrike alert workflow. DoD reporting contacts included (US-CERT, DIBNet).",
           "fips_validated": false,
-          "hash": "sha256:d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6"
+          "hash": "sha256:d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -1138,7 +1161,18 @@
         "description": "Incident response capability testing not yet conducted. No tabletop exercise performed in the past 12 months. POA&M item: conduct IR tabletop exercise by Q2 2026. IR plan exists (CA.L2-3.12.4) but untested.",
         "target_date": "2026-09-30"
       },
-      "evidence": []
+      "evidence": [],
+      "poa_and_m": {
+        "target_close_date": "2026-04-30",
+        "responsible_owner": "IT Director",
+        "remediation_steps": [
+          "Develop tabletop exercise scenario based on IR plan",
+          "Schedule exercise with IT staff and leadership",
+          "Conduct tabletop exercise",
+          "Document findings and update IR plan"
+        ],
+        "estimated_effort_weeks": 1
+      }
     },
     {
       "control_id": "MA.L2-3.7.1",
@@ -1205,7 +1239,17 @@
         "description": "Remote maintenance session logs exist in Splunk but are not formally reviewed or documented per policy. No written procedure for documenting remote maintenance activities. POA&M: implement remote maintenance log procedure by Q3 2026.",
         "target_date": "2026-09-30"
       },
-      "evidence": []
+      "evidence": [],
+      "poa_and_m": {
+        "target_close_date": "2026-04-15",
+        "responsible_owner": "IT Director",
+        "remediation_steps": [
+          "Draft remote maintenance documentation procedure",
+          "Integrate procedure into ServiceNow maintenance workflow",
+          "Train IT staff on documentation requirements"
+        ],
+        "estimated_effort_weeks": 1
+      }
     },
     {
       "control_id": "MA.L2-3.7.5",
@@ -1258,7 +1302,8 @@
           "collected_at": "2026-03-22T10:00:00Z",
           "detail": "Physical CUI document audit — shop floor. 14 job traveler packages reviewed. All packages containing drawing numbers with DoD contract numbers are now marked CUI per NARA guidelines. Secure storage cabinet installed in CNC programming area 2026-03-15. Audit procedure document: MP-001 v1.0.",
           "fips_validated": false,
-          "hash": "sha256:e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7"
+          "hash": "sha256:e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7",
+          "evidence_method": "observation"
         }
       ]
     },
@@ -1584,7 +1629,8 @@
           "detail": "CrowdStrike Falcon Spotlight vulnerability scan — overnight run 2026-03-24. 47 managed devices scanned. 0 critical CVEs unpatched. 3 medium CVEs identified — remediation assigned to P. Kowalski, target date 2026-04-07.",
           "fips_validated": false,
           "hash": "sha256:f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2b3c4d5e6f7a2",
-          "connector": "cta-crowdstrike-connector-v1"
+          "connector": "cta-crowdstrike-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -1748,7 +1794,8 @@
           "detail": "Azure AD and VPN configuration confirming TLS 1.3 (AES-256-GCM) for all CUI transmission paths. Email encryption enforced via M365 DLP policies for outbound messages to DoD domains. File transfer to Lockheed portal uses SFTP with FIPS-140-2 validated OpenSSH.",
           "fips_validated": true,
           "hash": "sha256:b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5",
-          "connector": "cta-azuread-connector-v1"
+          "connector": "cta-azuread-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -1804,7 +1851,8 @@
           "detail": "FIPS 140-2 validated cryptography confirmed across all CUI protection systems. Windows Server configured with FIPS-compliant algorithms enforced via Group Policy. M365 tenant enforces FIPS-compliant TLS. VPN uses FIPS-validated OpenSSL module (certificate: CMVP #4213).",
           "fips_validated": true,
           "hash": "sha256:c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6",
-          "connector": "cta-azuread-connector-v1"
+          "connector": "cta-azuread-connector-v1",
+          "evidence_method": "documentary"
         }
       ]
     },
@@ -1855,7 +1903,17 @@
         "description": "VoIP communications policy not documented. Shop uses physical phones not connected to CUI network, but no formal policy exists governing VoIP use in CUI areas. POA&M: document VoIP policy by Q2 2026.",
         "target_date": "2026-09-30"
       },
-      "evidence": []
+      "evidence": [],
+      "poa_and_m": {
+        "target_close_date": "2026-04-08",
+        "responsible_owner": "Compliance Lead",
+        "remediation_steps": [
+          "Document VoIP usage policy for CUI areas",
+          "Get policy approved by leadership",
+          "Distribute to affected personnel"
+        ],
+        "estimated_effort_weeks": 0.5
+      }
     },
     {
       "control_id": "SC.L2-3.13.15",
@@ -1915,7 +1973,9 @@
           "detail": "CrowdStrike confirms active vulnerability scanning and patching in practice. 3 medium CVEs under remediation. Written patch management policy not yet documented — POA&M item SI-001.",
           "fips_validated": false,
           "hash": "sha256:d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7",
-          "connector": "cta-crowdstrike-connector-v1"
+          "connector": "cta-crowdstrike-connector-v1",
+          "evidence_method": "documentary",
+          "coverage_percentage": 78
         }
       ]
     },
@@ -1941,7 +2001,9 @@
           "detail": "CrowdStrike Falcon sensor deployment status: 44/47 devices protected. 3 legacy CNC workstations (WIN7-CNC-01, WIN7-CNC-02, WIN7-CNC-03) not enrolled — OS unsupported by Falcon. POA&M item SI-002.",
           "fips_validated": false,
           "hash": "sha256:e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8a3b4c5d6e7f8",
-          "connector": "cta-crowdstrike-connector-v1"
+          "connector": "cta-crowdstrike-connector-v1",
+          "evidence_method": "documentary",
+          "coverage_percentage": 78
         }
       ]
     },
