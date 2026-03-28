@@ -4,7 +4,7 @@
   "title": "CTA Artifact",
   "description": "Compliance Traceability Artifact — portable, machine-readable CMMC Level 2 compliance proof. Published under CC BY 4.0. Schema spine: NIST SP 800-171 Rev 2.",
   "version": "0.1",
-  "doi": "10.5281/zenodo.pending",
+  "doi": "10.5281/zenodo.19292632",
   "type": "object",
   "required": [
     "cta_version",
