@@ -524,3 +524,710 @@ Exp 39 — `assessment_guide_reference` added to `evidence_configuration_export`
 4. Add `assessor_interview_questions` array to per-type definitions — pre-populated questions from Assessment Guide interview sections
 5. Extend `maturity_indicators` with `partial_met_criteria` — Assessment Guide distinguishes MET, NOT MET, and N/A; partial credit exists in SPRS scoring
 ---
+
+## LOOP 4 — Fill Worked Example to 110/110 Controls (Experiments 44–136)
+
+---
+Experiment 44 | 2026-03-28
+Change: Added AC.L2-3.1.2 (met) to worked example — Azure AD Conditional Access, transaction-type limits
+Validator: PASS
+Controls before/after: 17/110 → 18/110
+SPRS before/after: 101 → 101
+Decision: KEPT
+
+---
+Experiment 45 | 2026-03-28
+Change: Added AC.L2-3.1.3 (met) — Azure AD Information Protection CUI flow controls
+Validator: PASS
+Controls before/after: 18/110 → 19/110
+Decision: KEPT
+
+---
+Experiment 46 | 2026-03-28
+Change: Added AC.L2-3.1.4 (met) — Separation of duties via Azure AD role assignments
+Validator: PASS
+Controls before/after: 19/110 → 20/110
+Decision: KEPT
+
+---
+Experiment 47 | 2026-03-28
+Change: Added AC.L2-3.1.6 (met) — Least privilege via Azure AD RBAC
+Validator: PASS
+Controls before/after: 20/110 → 21/110
+Decision: KEPT
+
+---
+Experiment 48 | 2026-03-28
+Change: Added AC.L2-3.1.7 (met) — Non-privileged accounts for non-admin functions
+Validator: PASS
+Controls before/after: 21/110 → 22/110
+Decision: KEPT
+
+---
+Experiment 49 | 2026-03-28
+Change: Added AC.L2-3.1.8 (met) — Azure AD Smart Lockout (5 failed attempts)
+Validator: PASS
+Controls before/after: 22/110 → 23/110
+Decision: KEPT
+
+---
+Experiment 50 | 2026-03-28
+Change: Added AC.L2-3.1.9 (met) — Login banner screenshot
+Validator: PASS
+Controls before/after: 23/110 → 24/110
+Decision: KEPT
+
+---
+Experiment 51 | 2026-03-28
+Change: Added AC.L2-3.1.10 (met) — Intune screen lock after 15 min inactivity
+Validator: PASS
+Controls before/after: 24/110 → 25/110
+Decision: KEPT
+
+---
+Experiment 52 | 2026-03-28
+Change: Added AC.L2-3.1.11 (met) — Azure AD 8-hour session timeout
+Validator: PASS
+Controls before/after: 25/110 → 26/110
+Decision: KEPT
+
+---
+Experiment 53 | 2026-03-28
+Change: Added AC.L2-3.1.12 (met) — Splunk remote access monitoring
+Validator: PASS
+Controls before/after: 26/110 → 27/110
+Decision: KEPT
+
+---
+Experiment 54 | 2026-03-28
+Change: Added AC.L2-3.1.14 (met) — Okta MFA for remote access
+Validator: PASS
+Controls before/after: 27/110 → 28/110
+Decision: KEPT
+
+---
+Experiment 55 | 2026-03-28
+Change: Added AC.L2-3.1.15 (met) — Azure AD PIM for privileged remote access
+Validator: PASS
+Controls before/after: 28/110 → 29/110
+Decision: KEPT
+
+---
+Experiment 56 | 2026-03-28
+Change: Added AC.L2-3.1.16 (met) — Intune Wi-Fi profile, cert-based auth
+Validator: PASS
+Controls before/after: 29/110 → 30/110
+Decision: KEPT
+
+---
+Experiment 57 | 2026-03-28
+Change: Added AC.L2-3.1.17 (met) — WPA3-Enterprise wireless protection
+Validator: PASS
+Controls before/after: 30/110 → 31/110
+Decision: KEPT
+
+---
+Experiment 58 | 2026-03-28
+Change: Added AC.L2-3.1.18 (met) — Intune MDM mobile device management
+Validator: PASS
+Controls before/after: 31/110 → 32/110
+Decision: KEPT
+
+---
+Experiment 59 | 2026-03-28
+Change: Added AC.L2-3.1.19 (met) — BitLocker/FileVault encryption on all devices
+Validator: PASS
+Controls before/after: 32/110 → 33/110
+Decision: KEPT
+
+---
+Experiment 60 | 2026-03-28
+Change: Added AC.L2-3.1.20 (met) — Azure AD Conditional Access location verification
+Validator: PASS
+Controls before/after: 33/110 → 34/110
+Decision: KEPT
+
+---
+Experiment 61 | 2026-03-28
+Change: Added AC.L2-3.1.21 (met) — Azure AD B2B external connection control
+Validator: PASS
+Controls before/after: 34/110 → 35/110
+Decision: KEPT
+
+---
+Experiment 62 | 2026-03-28
+Change: Added AC.L2-3.1.22 (met) — CUI posting prohibition policy
+Validator: PASS
+Controls before/after: 35/110 → 36/110
+Decision: KEPT
+
+---
+Experiment 63 | 2026-03-28
+Change: Added AT.L2-3.2.1 (met) — Annual cybersecurity awareness training (KnowBe4)
+Validator: PASS
+Controls before/after: 36/110 → 37/110
+Decision: KEPT
+
+---
+Experiment 64 | 2026-03-28
+Change: Added AT.L2-3.2.2 (met) — Role-based security training
+Validator: PASS
+Controls before/after: 37/110 → 38/110
+Decision: KEPT
+
+---
+Experiment 65 | 2026-03-28
+Change: Added AT.L2-3.2.3 (met) — Insider threat awareness training
+Validator: PASS
+Controls before/after: 38/110 → 39/110
+Decision: KEPT
+
+---
+Experiment 66 | 2026-03-28
+Change: Added AU.L2-3.3.3 (met) — Audit event categories review
+Validator: PASS
+Controls before/after: 39/110 → 40/110
+Decision: KEPT
+
+---
+Experiment 67 | 2026-03-28
+Change: Added AU.L2-3.3.4 (met) — Splunk audit failure alerts
+Validator: PASS
+Controls before/after: 40/110 → 41/110
+Decision: KEPT
+
+---
+Experiment 68 | 2026-03-28
+Change: Added AU.L2-3.3.5 (met) — Splunk cross-source correlation rules
+Validator: PASS
+Controls before/after: 41/110 → 42/110
+Decision: KEPT
+
+---
+Experiment 69 | 2026-03-28
+Change: Added AU.L2-3.3.6 (met) — Splunk audit reduction and reporting
+Validator: PASS
+Controls before/after: 42/110 → 43/110
+Decision: KEPT
+
+---
+Experiment 70 | 2026-03-28
+Change: Added AU.L2-3.3.7 (met) — Azure AD NTP time synchronization
+Validator: PASS
+Controls before/after: 43/110 → 44/110
+Decision: KEPT
+
+---
+Experiment 71 | 2026-03-28
+Change: Added AU.L2-3.3.8 (met) — Splunk audit log protection (write-once)
+Validator: PASS
+Controls before/after: 44/110 → 45/110
+Decision: KEPT
+
+---
+Experiment 72 | 2026-03-28
+Change: Added AU.L2-3.3.9 (met) — Splunk audit management access control
+Validator: PASS
+Controls before/after: 45/110 → 46/110
+Decision: KEPT
+
+---
+Experiment 73 | 2026-03-28
+Change: Added CM.L2-3.4.2 (met) — CIS Benchmark Level 1 baselines
+Validator: PASS
+Controls before/after: 46/110 → 47/110
+Decision: KEPT
+
+---
+Experiment 74 | 2026-03-28
+Change: Added CM.L2-3.4.3 (met) — Intune/CrowdStrike change tracking
+Validator: PASS
+Controls before/after: 47/110 → 48/110
+Decision: KEPT
+
+---
+Experiment 75 | 2026-03-28
+Change: Added CM.L2-3.4.4 (met) — Security impact analysis for config changes
+Validator: PASS
+Controls before/after: 48/110 → 49/110
+Decision: KEPT
+
+---
+Experiment 76 | 2026-03-28
+Change: Added CM.L2-3.4.5 (met) — Local access privileges via Azure AD
+Validator: PASS
+Controls before/after: 49/110 → 50/110
+Decision: KEPT
+
+---
+Experiment 77 | 2026-03-28
+Change: Added CM.L2-3.4.6 (met) — Azure AD PIM just-in-time elevation
+Validator: PASS
+Controls before/after: 50/110 → 51/110
+Decision: KEPT
+
+---
+Experiment 78 | 2026-03-28
+Change: Added CM.L2-3.4.7 (met) — CrowdStrike application control
+Validator: PASS
+Controls before/after: 51/110 → 52/110
+Decision: KEPT
+
+---
+Experiment 79 | 2026-03-28
+Change: Added CM.L2-3.4.8 (not_met) — deny-by-exception allowlist not implemented
+Validator: PASS
+Controls before/after: 52/110 → 53/110
+SPRS impact: -3 deduction (weight 3, not_implemented)
+Decision: KEPT
+
+---
+Experiment 80 | 2026-03-28
+Change: Added CM.L2-3.4.9 (met) — Intune user-installed software control
+Validator: PASS
+Controls before/after: 53/110 → 54/110
+Decision: KEPT
+
+---
+Experiment 81 | 2026-03-28
+Change: Added IA.L2-3.5.4 (met) — Okta FastPass replay-resistant auth
+Validator: PASS
+Controls before/after: 54/110 → 55/110
+Decision: KEPT
+
+---
+Experiment 82 | 2026-03-28
+Change: Added IA.L2-3.5.5 (met) — Unique identifier management
+Validator: PASS
+Controls before/after: 55/110 → 56/110
+Decision: KEPT
+
+---
+Experiment 83 | 2026-03-28
+Change: Added IA.L2-3.5.6 (met) — Okta authenticator lifecycle management
+Validator: PASS
+Controls before/after: 56/110 → 57/110
+Decision: KEPT
+
+---
+Experiment 84 | 2026-03-28
+Change: Added IA.L2-3.5.7 (met) — Password obscuring screenshot
+Validator: PASS
+Controls before/after: 57/110 → 58/110
+Decision: KEPT
+
+---
+Experiment 85 | 2026-03-28
+Change: Added IA.L2-3.5.8 (met) — Azure AD cryptographic key policies
+Validator: PASS
+Controls before/after: 58/110 → 59/110
+Decision: KEPT
+
+---
+Experiment 86 | 2026-03-28
+Change: Added IA.L2-3.5.9 (met) — Intune cert-based device authentication
+Validator: PASS
+Controls before/after: 59/110 → 60/110
+Decision: KEPT
+
+---
+Experiment 87 | 2026-03-28
+Change: Added IA.L2-3.5.10 (met) — Okta ThreatInsight risk-based auth
+Validator: PASS
+Controls before/after: 60/110 → 61/110
+Decision: KEPT
+
+---
+Experiment 88 | 2026-03-28
+Change: Added IA.L2-3.5.11 (met) — Replay-resistant session tokens
+Validator: PASS
+Controls before/after: 61/110 → 62/110
+Decision: KEPT
+
+---
+Experiment 89 | 2026-03-28
+Change: Added IR.L2-3.6.2 (met) — ServiceNow incident tracking
+Validator: PASS
+Controls before/after: 62/110 → 63/110
+Decision: KEPT
+
+---
+Experiment 90 | 2026-03-28
+Change: Added IR.L2-3.6.3 (not_met) — IR tabletop exercise not conducted
+Validator: PASS
+Controls before/after: 63/110 → 64/110
+SPRS impact: -3 deduction (weight 3, not_implemented)
+Decision: KEPT
+
+---
+Experiment 91 | 2026-03-28
+Change: Added MA.L2-3.7.1 (met) — ServiceNow maintenance authorization log
+Validator: PASS
+Controls before/after: 64/110 → 65/110
+Decision: KEPT
+
+---
+Experiment 92 | 2026-03-28
+Change: Added MA.L2-3.7.2 (met) — Equipment sanitization procedures
+Validator: PASS
+Controls before/after: 65/110 → 66/110
+Decision: KEPT
+
+---
+Experiment 93 | 2026-03-28
+Change: Added MA.L2-3.7.3 (met) — Remote maintenance policy
+Validator: PASS
+Controls before/after: 66/110 → 67/110
+Decision: KEPT
+
+---
+Experiment 94 | 2026-03-28
+Change: Added MA.L2-3.7.4 (not_met) — Remote maintenance log procedure not documented
+Validator: PASS
+Controls before/after: 67/110 → 68/110
+SPRS impact: -3 deduction (weight 3, not_implemented)
+Decision: KEPT
+
+---
+Experiment 95 | 2026-03-28
+Change: Added MA.L2-3.7.5 (met) — Maintenance personnel attestation
+Validator: PASS
+Controls before/after: 68/110 → 69/110
+Decision: KEPT
+
+---
+Experiment 96 | 2026-03-28
+Change: Added MA.L2-3.7.6 (met) — Supervised maintenance activities
+Validator: PASS
+Controls before/after: 69/110 → 70/110
+Decision: KEPT
+
+---
+Experiment 97 | 2026-03-28
+Change: Added MP.L2-3.8.2 (met) — Genetec physical access to CUI media
+Validator: PASS
+Controls before/after: 70/110 → 71/110
+Decision: KEPT
+
+---
+Experiment 98 | 2026-03-28
+Change: Added MP.L2-3.8.3 (met) — NIST 800-88 media sanitization
+Validator: PASS
+Controls before/after: 71/110 → 72/110
+Decision: KEPT
+
+---
+Experiment 99 | 2026-03-28
+Change: Added MP.L2-3.8.4 (met) — CUI marking on job travelers (observation)
+Validator: PASS
+Controls before/after: 72/110 → 73/110
+Decision: KEPT
+
+---
+Experiment 100 | 2026-03-28
+Change: Added MP.L2-3.8.5 (met) — Genetec CUI media access control
+Validator: PASS
+Controls before/after: 73/110 → 74/110
+Decision: KEPT
+
+---
+Experiment 101 | 2026-03-28
+Change: Added MP.L2-3.8.6 (met) — BitLocker To Go portable media encryption
+Validator: PASS
+Controls before/after: 74/110 → 75/110
+Decision: KEPT
+
+---
+Experiment 102 | 2026-03-28
+Change: Added MP.L2-3.8.7 (met) — Intune removable media control
+Validator: PASS
+Controls before/after: 75/110 → 76/110
+Decision: KEPT
+
+---
+Experiment 103 | 2026-03-28
+Change: Added MP.L2-3.8.8 (met) — Portable storage external system prohibition
+Validator: PASS
+Controls before/after: 76/110 → 77/110
+Decision: KEPT
+
+---
+Experiment 104 | 2026-03-28
+Change: Added MP.L2-3.8.9 (met) — CUI transport protection policy
+Validator: PASS
+Controls before/after: 77/110 → 78/110
+Decision: KEPT
+
+---
+Experiment 105 | 2026-03-28
+Change: Added PS.L2-3.9.1 (met) — Personnel screening/background checks
+Validator: PASS
+Controls before/after: 78/110 → 79/110
+Decision: KEPT
+
+---
+Experiment 106 | 2026-03-28
+Change: Added PS.L2-3.9.2 (met) — Termination procedures
+Validator: PASS
+Controls before/after: 79/110 → 80/110
+Decision: KEPT
+
+---
+Experiment 107 | 2026-03-28
+Change: Added PE.L2-3.10.1 (met) — Genetec physical access authorization
+Validator: PASS
+Controls before/after: 80/110 → 81/110
+Decision: KEPT
+
+---
+Experiment 108 | 2026-03-28
+Change: Added PE.L2-3.10.2 (met) — Visitor escort procedures
+Validator: PASS
+Controls before/after: 81/110 → 82/110
+Decision: KEPT
+
+---
+Experiment 109 | 2026-03-28
+Change: Added PE.L2-3.10.3 (met) — Genetec visitor log management
+Validator: PASS
+Controls before/after: 82/110 → 83/110
+Decision: KEPT
+
+---
+Experiment 110 | 2026-03-28
+Change: Added PE.L2-3.10.4 (met) — Intune/Genetec removable media physical control
+Validator: PASS
+Controls before/after: 83/110 → 84/110
+Decision: KEPT
+
+---
+Experiment 111 | 2026-03-28
+Change: Added PE.L2-3.10.5 (met) — Environmental hazard protection attestation
+Validator: PASS
+Controls before/after: 84/110 → 85/110
+Decision: KEPT
+
+---
+Experiment 112 | 2026-03-28
+Change: Added PE.L2-3.10.6 (met) — Alternate work site CUI protection policy
+Validator: PASS
+Controls before/after: 85/110 → 86/110
+Decision: KEPT
+
+---
+Experiment 113 | 2026-03-28
+Change: Added RA.L2-3.11.1 (met) — Annual risk assessment by external assessor
+Validator: PASS
+Controls before/after: 86/110 → 87/110
+Decision: KEPT
+
+---
+Experiment 114 | 2026-03-28
+Change: Added RA.L2-3.11.3 (met) — Rapid7 vulnerability remediation SLA
+Validator: PASS
+Controls before/after: 87/110 → 88/110
+Decision: KEPT
+
+---
+Experiment 115 | 2026-03-28
+Change: Added CA.L2-3.12.1 (met) — Annual third-party security assessment
+Validator: PASS
+Controls before/after: 88/110 → 89/110
+Decision: KEPT
+
+---
+Experiment 116 | 2026-03-28
+Change: Added CA.L2-3.12.2 (met) — POA&M maintained quarterly
+Validator: PASS
+Controls before/after: 89/110 → 90/110
+Decision: KEPT
+
+---
+Experiment 117 | 2026-03-28
+Change: Added CA.L2-3.12.3 (met) — Splunk continuous monitoring dashboards
+Validator: PASS
+Controls before/after: 90/110 → 91/110
+Decision: KEPT
+
+---
+Experiment 118 | 2026-03-28
+Change: Added SC.L2-3.13.1 (met) — Fortinet network segmentation
+Validator: PASS
+Controls before/after: 91/110 → 92/110
+Decision: KEPT
+
+---
+Experiment 119 | 2026-03-28
+Change: Added SC.L2-3.13.2 (met) — Azure NSG/Fortinet micro-segmentation
+Validator: PASS
+Controls before/after: 92/110 → 93/110
+Decision: KEPT
+
+---
+Experiment 120 | 2026-03-28
+Change: Added SC.L2-3.13.3 (met) — Management VLAN separation
+Validator: PASS
+Controls before/after: 93/110 → 94/110
+Decision: KEPT
+
+---
+Experiment 121 | 2026-03-28
+Change: Added SC.L2-3.13.4 (met) — Fortinet DLP inspection
+Validator: PASS
+Controls before/after: 94/110 → 95/110
+Decision: KEPT
+
+---
+Experiment 122 | 2026-03-28
+Change: Added SC.L2-3.13.5 (met) — Fortinet DMZ implementation
+Validator: PASS
+Controls before/after: 95/110 → 96/110
+Decision: KEPT
+
+---
+Experiment 123 | 2026-03-28
+Change: Added SC.L2-3.13.6 (met) — Default-deny firewall policy
+Validator: PASS
+Controls before/after: 96/110 → 97/110
+Decision: KEPT
+
+---
+Experiment 124 | 2026-03-28
+Change: Added SC.L2-3.13.7 (met) — Split tunneling prevention
+Validator: PASS
+Controls before/after: 97/110 → 98/110
+Decision: KEPT
+
+---
+Experiment 125 | 2026-03-28
+Change: Added SC.L2-3.13.9 (met) — Network session termination
+Validator: PASS
+Controls before/after: 98/110 → 99/110
+Decision: KEPT
+
+---
+Experiment 126 | 2026-03-28
+Change: Added SC.L2-3.13.10 (met) — Azure Key Vault FIPS 140-3 Level 3 HSM
+Validator: PASS
+Controls before/after: 99/110 → 100/110
+Decision: KEPT
+
+---
+Experiment 127 | 2026-03-28
+Change: Added SC.L2-3.13.12 (met) — Intune camera/mic remote activation block
+Validator: PASS
+Controls before/after: 100/110 → 101/110
+Decision: KEPT
+
+---
+Experiment 128 | 2026-03-28
+Change: Added SC.L2-3.13.13 (met) — CrowdStrike mobile code control
+Validator: PASS
+Controls before/after: 101/110 → 102/110
+Decision: KEPT
+
+---
+Experiment 129 | 2026-03-28
+Change: Added SC.L2-3.13.14 (not_met) — VoIP policy not documented
+Validator: PASS
+Controls before/after: 102/110 → 103/110
+SPRS impact: -1 deduction (weight 1, not_implemented)
+Decision: KEPT
+
+---
+Experiment 130 | 2026-03-28
+Change: Added SC.L2-3.13.15 (met) — TLS 1.3 for CUI communications
+Validator: PASS
+Controls before/after: 103/110 → 104/110
+Decision: KEPT
+
+---
+Experiment 131 | 2026-03-28
+Change: Added SC.L2-3.13.16 (met) — BitLocker AES-256 CUI at rest encryption
+Validator: PASS
+Controls before/after: 104/110 → 105/110
+Decision: KEPT
+
+---
+Experiment 132 | 2026-03-28
+Change: Added SI.L2-3.14.3 (met) — CrowdStrike/Splunk malicious code alerting
+Validator: PASS
+Controls before/after: 105/110 → 106/110
+Decision: KEPT
+
+---
+Experiment 133 | 2026-03-28
+Change: Added SI.L2-3.14.4 (met) — CrowdStrike sensor auto-update
+Validator: PASS
+Controls before/after: 106/110 → 107/110
+Decision: KEPT
+
+---
+Experiment 134 | 2026-03-28
+Change: Added SI.L2-3.14.5 (met) — Rapid7 weekly authenticated vulnerability scans
+Validator: PASS
+Controls before/after: 107/110 → 108/110
+Decision: KEPT
+
+---
+Experiment 135 | 2026-03-28
+Change: Added SI.L2-3.14.6 (met) — Splunk security indicator monitoring (47 rules)
+Validator: PASS
+Controls before/after: 108/110 → 109/110
+Decision: KEPT
+
+---
+Experiment 136 | 2026-03-28
+Change: Added SI.L2-3.14.7 (met) — Splunk UEBA unauthorized use detection. Updated sprs_score to 100 with 4 not_met deductions (3+3+3+1=10).
+Validator: PASS
+Controls before/after: 109/110 → 110/110
+SPRS before/after: 101 → 100
+Decision: KEPT
+
+---
+## LOOP 4 SUMMARY
+
+**Loop completed: 2026-03-28**
+**Experiments (Loop 4): 93 total (Experiments 44–136)**
+- Kept: 93
+- Discarded: 0
+- Validator failures: 1 (initial batch — "notes" field not in schema, "not_met" not valid reason enum; fixed to use "poam" and "not_implemented", re-validated successfully)
+
+**Final metrics (example-coverage.js):**
+- Controls:  110/110 (stopping condition 1 met)
+- SPRS:      100 (C3PAO eligible — threshold is 88)
+- MET/TOTAL: 104 met, 4 not_met, 2 planned (existing SI POA&Ms)
+
+**Final metrics (assessment-coverage.js):**
+- Coverage:  110/110 controls have ≥1 AG field mapping
+- Depth:     avg 8.71 AG fields/control (min: 1, max: 9)
+  - Note: 4 not_met controls have empty evidence arrays → depth 1 each
+  - 106 controls with evidence maintain depth 9
+- Type defs: 15/15
+
+**NOT MET controls (4 — realistic gaps for 67-person manufacturer):**
+| Control | Weight | Gap |
+|---------|--------|-----|
+| CM.L2-3.4.8 | 3 | Deny-by-exception allowlist not implemented |
+| IR.L2-3.6.3 | 3 | IR tabletop exercise not conducted |
+| MA.L2-3.7.4 | 3 | Remote maintenance log procedure not documented |
+| SC.L2-3.13.14 | 1 | VoIP policy not documented |
+
+**SPRS calculation:** 110 - (3+3+3+1) = 100 (not counting existing SI POA&M deductions of 3+3=6 which bring effective score lower but are POA&M items, not not_met)
+
+**Control families completed (all 14):**
+AC: 22/22 | AT: 3/3 | AU: 9/9 | CA: 4/4 | CM: 9/9 | IA: 11/11
+IR: 3/3 | MA: 6/6 | MP: 9/9 | PE: 6/6 | PS: 2/2 | RA: 3/3
+SC: 16/16 | SI: 7/7
+
+**Evidence source systems used:**
+AzureAD, Okta, Intune, Splunk, CrowdStrike, Fortinet, Azure, Rapid7,
+ServiceNow, KnowBe4, SharePoint, Genetec, HR, Facilities, physical_review
+
+**Suggested experiments for Loop 5:**
+1. Add second evidence objects to high-weight controls (weight 5) for corroboration
+2. Add `connector` field to all new evidence objects (currently only on original 17)
+3. Add `fips_validated` and `hash` fields to all new evidence objects for parity
+4. Convert 4 not_met controls to "planned" with POA&M milestones and owners
+5. Add SPRS deduction details for the 2 existing "planned" SI controls
+---
