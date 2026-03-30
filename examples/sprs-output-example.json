@@ -2,7 +2,7 @@
   "_comment": "Marcus Webb — Webb Precision Manufacturing, Rockford IL. 67 employees. 3 active DoD contracts ($4.2M). SPRS score post-remediation. This is a worked example showing a real-world CTA artifact after the five priority remediations from the Elicit session were completed.",
   "cta_version": "0.1",
   "artifact_id": "a3f8e2c1-47b6-4d9a-8e5f-1c2d3e4f5a6b",
-  "schema": "https://github.com/ThemeFR/cta/raw/main/spec/cta-v0.1.schema.json",
+  "schema": "https://github.com/ThemeFR/Compliance-Traceability-Artifact/raw/main/spec/cta-v0.1.schema.json",
   "generated_at": "2026-03-26T14:23:11Z",
   "valid_until": "2027-03-26T14:23:11Z",
   "issuer": {
