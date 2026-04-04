@@ -1,0 +1,1026 @@
+# DORRL Ontology v1.0.2
+# Domain Ontology for Radiation Records & Regulatory Liability
+# Namespace: https://canonmgmt.com/ontology/dorrl/
+# Author: Canon Management / Dalaun Finch
+# Generated: 2026-04-04 (v1.0.0 + v1.0.1 patch)
+# v1.0.2 change: Added owl:imports gistBFO for DoD BFO conformance
+#
+# RECONSTRUCTION NOTE:
+# v1.0.1 TTL (45KB, 72 classes) existed only in a prior session container.
+# This file reconstructs v1.0.1 from CTA notebook sources:
+#   - d9c7478c (v1.0.0 TTL header + prefix block)
+#   - b028a988 (v1.0.1 gist-14 patch — 5 corrections + 1 namespace fix)
+#   - 07e9d1c6 (session canon — key decisions and agreements)
+#   - 05e37d0b (DORRL Vocabulary Canon — preferred term registry)
+#   - 69e94975 (Neo4j handoff — 72 class labels, object properties, gates)
+#   - 331fa35c (2026-04-04 canon — GoalCommitment pending rename, ContingentObligation)
+#
+# PENDING (v1.0.3 next ontogize session):
+#   - dorrl:ComplianceCommitment → rename to dorrl:GoalCommitment
+#   - rdfs:subClassOf gist:Commitment → rdfs:subClassOf gist:ContingentObligation
+#   - dorrl:hasDomainTrigger rdfs:subPropertyOf gist:isTriggeredBy
+#   - GAP-05: RSOReleaseEvent → myLDR Signature Suite field mapping
+#
+# OPEN GAPS:
+#   - FMA IDs missing for: RedBoneMarrow, Gonads, LensOfEye, BoneSurface
+#   - SNOMED verification pending on 48/57 tissue nodes
+#   - 7 of 11 exactMatch hits trace back to RBO or RBO imports
+#   - ComplianceCommitment rename propagation pending in dorrl-neo4j-handoff.md
+
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix gist:    <https://w3id.org/semanticarts/ns/ontology/gist/> .
+@prefix dorrl:   <https://canonmgmt.com/ontology/dorrl/> .
+@prefix rbo:     <http://purl.obolibrary.org/obo/RBO_> .
+@prefix ncit:    <http://purl.obolibrary.org/obo/NCIT_> .
+@prefix uo:      <http://purl.obolibrary.org/obo/UO_> .
+@prefix chebi:   <http://purl.obolibrary.org/obo/CHEBI_> .
+@prefix mondo:   <http://purl.obolibrary.org/obo/MONDO_> .
+@prefix pbpko:   <http://purl.obolibrary.org/obo/PBPKO_> .
+@prefix snomed:  <http://snomed.info/id/> .
+@prefix fma:     <http://purl.obolibrary.org/obo/FMA_> .
+@prefix mesh:    <http://id.nlm.nih.gov/mesh/> .
+@prefix qudt:    <http://qudt.org/vocab/unit/> .
+
+# =============================================================================
+# OWL ONTOLOGY BLOCK
+# =============================================================================
+
+<https://canonmgmt.com/ontology/dorrl>
+    a owl:Ontology ;
+    owl:versionIRI <https://canonmgmt.com/ontology/dorrl/1.0.2> ;
+    owl:versionInfo "1.0.2" ;
+    owl:imports <https://w3id.org/semanticarts/ns/ontology/gist/> ;
+    owl:imports <https://w3id.org/semanticarts/ontology/gistBFO> ;
+    dcterms:title "DORRL — Domain Ontology for Radiation Records & Regulatory Liability"@en ;
+    dcterms:description "Formal OWL ontology for dosimetry compliance in the defense supply chain. Models radiation science taxonomy, dosimetry workflow, and CMMC Level 2 evidence chains. Aligned to gist 14.0.0 upper ontology and BFO via gistBFO bridge."@en ;
+    dcterms:creator "Canon Management / Dalaun Finch"@en ;
+    dcterms:created "2026-04-04"^^xsd:date ;
+    dcterms:modified "2026-04-04"^^xsd:date ;
+    rdfs:comment "v1.0.2: Added owl:imports gistBFO for BFO alignment per DoD ontology conformance requirement (DoD mandates BFO for all defense ontology work). gistBFO bridge maps all gist classes to BFO — no DORRL class definitions changed. UnitOfMeasure is documented BFO orphan in gistBFO; dorrl:DosimetryUnit inherits this status."@en ;
+    rdfs:comment "v1.0.1: gist 14.0.0 compatibility patch — 5 class remappings + namespace correction. Removed gist:PhysicalThing (BFO concept, not gist). Corrected: RadiationType→Category, Radionuclide→KnowledgeConcept, Tissue→KnowledgeConcept, DosimeterDevice→Equipment, DosimetryUnit→UnitOfMeasure. Namespace: semanticarts.com→w3id.org canonical IRI."@en .
+
+# =============================================================================
+# OBJECT PROPERTIES
+# =============================================================================
+
+dorrl:hasDomainTrigger
+    a owl:ObjectProperty ;
+    rdfs:label "has domain trigger"@en ;
+    skos:definition "The workflow event that activates a compliance obligation within the DORRL domain."@en ;
+    rdfs:domain dorrl:ComplianceCommitment ;
+    # NOTE v1.0.3: add rdfs:subPropertyOf gist:isTriggeredBy
+    rdfs:comment "PENDING v1.0.3: rdfs:subPropertyOf gist:isTriggeredBy — enables federation with any gist-aligned ontology."@en .
+
+dorrl:hasGoverningGoal
+    a owl:ObjectProperty ;
+    rdfs:label "has governing goal"@en ;
+    skos:definition "Maps a ComplianceCommitment to the regulatory objective from the Governance Ontology."@en ;
+    rdfs:domain dorrl:ComplianceCommitment .
+
+dorrl:hasObligatedActor
+    a owl:ObjectProperty ;
+    rdfs:label "has obligated actor"@en ;
+    skos:definition "Maps a ComplianceCommitment to the specific person who owns the obligation."@en ;
+    rdfs:domain dorrl:ComplianceCommitment ;
+    rdfs:range dorrl:RSO .
+
+dorrl:basedOn
+    a owl:ObjectProperty ;
+    rdfs:label "based on"@en ;
+    skos:definition "Links a DoseOfRecord to the DoseReading(s) that support it."@en ;
+    rdfs:domain dorrl:DoseOfRecord ;
+    rdfs:range dorrl:DoseReading .
+
+dorrl:attestedBy
+    a owl:ObjectProperty ;
+    rdfs:label "attested by"@en ;
+    skos:definition "Links a DoseOfRecord to the RSO who certified it."@en ;
+    rdfs:domain dorrl:DoseOfRecord ;
+    rdfs:range dorrl:RSO .
+
+dorrl:releases
+    a owl:ObjectProperty ;
+    rdfs:label "releases"@en ;
+    skos:definition "Links an RSOReleaseEvent to the DoseOfRecord it publishes."@en ;
+    rdfs:domain dorrl:RSOReleaseEvent ;
+    rdfs:range dorrl:DoseOfRecord .
+
+dorrl:triggers
+    a owl:ObjectProperty ;
+    rdfs:label "triggers"@en ;
+    skos:definition "Links an ALARAThreshold to an ALARAResponseEvent when the threshold is exceeded."@en ;
+    rdfs:domain dorrl:ALARAThreshold ;
+    rdfs:range dorrl:ALARAResponseEvent .
+
+dorrl:measuredBy
+    a owl:ObjectProperty ;
+    rdfs:label "measured by"@en ;
+    skos:definition "Links a DoseReading to the DosimeterDevice that produced the measurement."@en ;
+    rdfs:domain dorrl:DoseReading ;
+    rdfs:range dorrl:DosimeterDevice .
+
+dorrl:expressedIn
+    a owl:ObjectProperty ;
+    rdfs:label "expressed in"@en ;
+    skos:definition "Links a DoseReading to the DosimetryUnit in which it is expressed."@en ;
+    rdfs:domain dorrl:DoseReading ;
+    rdfs:range dorrl:DosimetryUnit .
+
+dorrl:assignedTo
+    a owl:ObjectProperty ;
+    rdfs:label "assigned to"@en ;
+    skos:definition "Links a DosimeterDevice to the Worker who wears it during a monitoring period."@en ;
+    rdfs:domain dorrl:DosimeterDevice ;
+    rdfs:range dorrl:Worker .
+
+dorrl:worksFor
+    a owl:ObjectProperty ;
+    rdfs:label "works for"@en ;
+    skos:definition "Links a Worker or RSO to their Organization."@en ;
+    rdfs:domain dorrl:Worker ;
+    rdfs:range dorrl:Organization .
+
+# =============================================================================
+# DATATYPE PROPERTIES
+# =============================================================================
+
+dorrl:detectionTechnology
+    a owl:DatatypeProperty ;
+    rdfs:label "detection technology"@en ;
+    skos:definition "The physical dosimeter technology used: OSL, TLD, Film, or Electronic. McComb separation enforced — these are string values, not OWL subclasses."@en ;
+    rdfs:domain dorrl:DosimeterDevice ;
+    rdfs:range xsd:string .
+
+dorrl:doseValue
+    a owl:DatatypeProperty ;
+    rdfs:label "dose value"@en ;
+    skos:definition "Numeric dose measurement value."@en ;
+    rdfs:domain dorrl:DoseReading ;
+    rdfs:range xsd:decimal .
+
+dorrl:tissueWeightingFactor
+    a owl:DatatypeProperty ;
+    rdfs:label "tissue weighting factor"@en ;
+    skos:definition "ICRP wT factor for effective dose calculation. Dimensionless."@en ;
+    rdfs:domain dorrl:Tissue ;
+    rdfs:range xsd:decimal .
+
+dorrl:halfLife
+    a owl:DatatypeProperty ;
+    rdfs:label "half-life"@en ;
+    skos:definition "Physical half-life of the radionuclide in years unless otherwise noted."@en ;
+    rdfs:domain dorrl:Radionuclide ;
+    rdfs:range xsd:string .
+
+dorrl:radiationWeightingFactor
+    a owl:DatatypeProperty ;
+    rdfs:label "radiation weighting factor"@en ;
+    skos:definition "ICRP wR factor for equivalent dose calculation."@en ;
+    rdfs:domain dorrl:RadiationType ;
+    rdfs:range xsd:decimal .
+
+dorrl:limitValue
+    a owl:DatatypeProperty ;
+    rdfs:label "limit value"@en ;
+    skos:definition "Numeric threshold for a DoseLimit or ALARAThreshold."@en ;
+    rdfs:range xsd:decimal .
+
+dorrl:emailAddress
+    a owl:DatatypeProperty ;
+    rdfs:label "email address"@en ;
+    skos:definition "Worker email address required for RSO report publishing via myLDR. GAP-05: Legacy myLDR records may not have this populated — silent failure on publish."@en ;
+    rdfs:domain dorrl:Worker ;
+    rdfs:range xsd:string .
+
+# =============================================================================
+# LAYER 1 — RADIATION SCIENCE FRAMEWORK (12 top-concept classes)
+# =============================================================================
+
+dorrl:RadiationType
+    a owl:Class ;
+    rdfs:subClassOf gist:Category ;
+    rdfs:label "Radiation type"@en ;
+    skos:definition "Classification scheme for types of ionizing radiation, characterized by particle type and linear energy transfer."@en ;
+    skos:note "v1.0.1 correction: was gist:PhysicalThing (does not exist in gist 14.0.0) → gist:Category (classification scheme, not physical object)."@en .
+
+dorrl:DosimetryUnit
+    a owl:Class ;
+    rdfs:subClassOf gist:UnitOfMeasure ;
+    rdfs:label "Dosimetry unit"@en ;
+    skos:definition "A unit of measure specific to ionizing radiation dose, exposure, or activity."@en ;
+    skos:note "v1.0.1 correction: was gist:PhysicalThing → gist:UnitOfMeasure. UnitOfMeasure is a documented BFO orphan in gistBFO (no BFO superclass assigned). This status is inherited by dorrl:DosimetryUnit."@en .
+
+dorrl:Radionuclide
+    a owl:Class ;
+    rdfs:subClassOf gist:KnowledgeConcept ;
+    rdfs:label "Radionuclide"@en ;
+    skos:definition "An unstable atomic species that undergoes radioactive decay, emitting ionizing radiation."@en ;
+    skos:note "v1.0.1 correction: was gist:PhysicalThing → gist:KnowledgeConcept. Per gist 14 scope note: periodic table species = KnowledgeConcept."@en .
+
+dorrl:DecayMode
+    a owl:Class ;
+    rdfs:subClassOf gist:Category ;
+    rdfs:label "Decay mode"@en ;
+    skos:definition "The mechanism by which an unstable nucleus loses energy through radioactive decay."@en .
+
+dorrl:Tissue
+    a owl:Class ;
+    rdfs:subClassOf gist:KnowledgeConcept ;
+    rdfs:label "Tissue"@en ;
+    skos:definition "An ICRP-defined organ or tissue category used in effective dose calculation via tissue weighting factors."@en ;
+    skos:note "v1.0.1 correction: was gist:PhysicalThing → gist:KnowledgeConcept. ICRP regulatory construct, not anatomical instance."@en .
+
+dorrl:BiologicalEffect
+    a owl:Class ;
+    rdfs:subClassOf gist:KnowledgeConcept ;
+    rdfs:label "Biological effect"@en ;
+    skos:definition "A health effect in living tissue caused by ionizing radiation exposure."@en .
+
+dorrl:ExposurePathway
+    a owl:Class ;
+    rdfs:subClassOf gist:KnowledgeConcept ;
+    rdfs:label "Exposure pathway"@en ;
+    skos:definition "The route by which radioactive material enters or irradiates the human body."@en .
+
+dorrl:DoseLimit
+    a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;
+    rdfs:label "Dose limit"@en ;
+    skos:definition "A regulatory or administrative maximum dose allowed for a defined period, worker category, or tissue."@en .
+
+dorrl:DoseConstraint
+    a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;
+    rdfs:label "Dose constraint"@en ;
+    skos:definition "A prospective, source-related restriction on individual dose used in optimization of radiation protection."@en .
+
+dorrl:DosimeterDevice
+    a owl:Class ;
+    rdfs:subClassOf gist:Equipment ;
+    rdfs:label "Dosimeter device"@en ;
+    skos:definition "A human-made, tangible instrument used to measure ionizing radiation dose received by a person."@en ;
+    skos:note "v1.0.1 correction: was gist:PhysicalThing → gist:Equipment (human-made, tangible property used to perform a task)."@en .
+
+dorrl:Organization
+    a owl:Class ;
+    rdfs:subClassOf gist:Organization ;
+    rdfs:label "Organization"@en ;
+    skos:definition "A legal or administrative body involved in radiation dose record management, regulatory oversight, or dosimetry services."@en .
+
+dorrl:Framework
+    a owl:Class ;
+    rdfs:subClassOf gist:Agreement ;
+    rdfs:label "Framework"@en ;
+    skos:definition "A regulatory or standards framework governing radiation protection and dosimetry record requirements."@en .
+
+# =============================================================================
+# LAYER 2 — RADIATION TYPES (subclasses of RadiationType)
+# =============================================================================
+
+dorrl:Alpha
+    a owl:Class ;
+    rdfs:subClassOf dorrl:RadiationType ;
+    rdfs:label "Alpha radiation"@en ;
+    skos:prefLabel "Alpha radiation"@en ;
+    skos:altLabel "Alpha particle"@en , "Alpha"@en ;
+    skos:notation "α" ;
+    skos:definition "Helium nucleus emitted during radioactive decay; high linear energy transfer, short range in tissue."@en ;
+    dorrl:radiationWeightingFactor "20"^^xsd:decimal .
+
+dorrl:BetaMinus
+    a owl:Class ;
+    rdfs:subClassOf dorrl:RadiationType ;
+    rdfs:label "Beta-minus radiation"@en ;
+    skos:prefLabel "Beta-minus radiation"@en ;
+    skos:altLabel "Beta particle"@en , "Beta-minus"@en ;
+    skos:notation "β⁻" ;
+    skos:definition "High-speed electron emitted from neutron decay in the nucleus."@en ;
+    dorrl:radiationWeightingFactor "1"^^xsd:decimal .
+
+dorrl:BetaPlus
+    a owl:Class ;
+    rdfs:subClassOf dorrl:RadiationType ;
+    rdfs:label "Beta-plus radiation"@en ;
+    skos:prefLabel "Beta-plus radiation"@en ;
+    skos:altLabel "Positron emission"@en ;
+    skos:notation "β⁺" ;
+    skos:definition "Positron emitted during beta-plus decay; annihilates to produce 511 keV photon pair."@en ;
+    dorrl:radiationWeightingFactor "1"^^xsd:decimal .
+
+dorrl:Gamma
+    a owl:Class ;
+    rdfs:subClassOf dorrl:RadiationType ;
+    rdfs:label "Gamma radiation"@en ;
+    skos:prefLabel "Gamma radiation"@en ;
+    skos:altLabel "Gamma ray"@en ;
+    skos:notation "γ" ;
+    skos:definition "High-energy electromagnetic radiation emitted from nuclear transitions."@en ;
+    dorrl:radiationWeightingFactor "1"^^xsd:decimal .
+
+dorrl:Xray
+    a owl:Class ;
+    rdfs:subClassOf dorrl:RadiationType ;
+    rdfs:label "X-ray radiation"@en ;
+    skos:prefLabel "X-ray radiation"@en ;
+    skos:altLabel "X-ray"@en ;
+    skos:notation "X" ;
+    skos:definition "Electromagnetic radiation produced by electron transitions or bremsstrahlung."@en ;
+    dorrl:radiationWeightingFactor "1"^^xsd:decimal .
+
+dorrl:Neutron
+    a owl:Class ;
+    rdfs:subClassOf dorrl:RadiationType ;
+    rdfs:label "Neutron radiation"@en ;
+    skos:prefLabel "Neutron radiation"@en ;
+    skos:altLabel "Neutron"@en ;
+    skos:notation "n" ;
+    skos:definition "Neutral hadron with high penetration; produces secondary ionizing radiation."@en ;
+    skos:note "wR energy-dependent: 2.5-20."@en .
+
+dorrl:Proton
+    a owl:Class ;
+    rdfs:subClassOf dorrl:RadiationType ;
+    rdfs:label "Proton radiation"@en ;
+    skos:prefLabel "Proton radiation"@en ;
+    skos:altLabel "Proton beam"@en ;
+    skos:notation "p" ;
+    skos:definition "Ionizing proton particle; primary modality in proton therapy."@en ;
+    dorrl:radiationWeightingFactor "2"^^xsd:decimal .
+
+dorrl:HeavyIon
+    a owl:Class ;
+    rdfs:subClassOf dorrl:RadiationType ;
+    rdfs:label "Heavy ion radiation"@en ;
+    skos:prefLabel "Heavy ion radiation"@en ;
+    skos:altLabel "HZE particle"@en , "High-Z high-energy nuclei"@en ;
+    skos:notation "HZE" ;
+    skos:definition "High atomic number, high-energy nuclei dominant in space radiation environments."@en ;
+    dorrl:radiationWeightingFactor "20"^^xsd:decimal .
+
+dorrl:Muon
+    a owl:Class ;
+    rdfs:subClassOf dorrl:RadiationType ;
+    rdfs:label "Muon radiation"@en ;
+    skos:prefLabel "Muon radiation"@en ;
+    skos:altLabel "Muon"@en ;
+    skos:notation "μ" ;
+    skos:definition "Cosmic ray secondary particle with high penetration."@en ;
+    dorrl:radiationWeightingFactor "1"^^xsd:decimal .
+
+# =============================================================================
+# LAYER 3 — DOSIMETRY UNITS (subclasses of DosimetryUnit)
+# =============================================================================
+
+dorrl:Gray
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DosimetryUnit ;
+    rdfs:label "Gray"@en ;
+    skos:prefLabel "Gray"@en ;
+    skos:altLabel "Gy"@en ;
+    skos:notation "Gy" ;
+    skos:definition "SI unit of absorbed dose and kerma; 1 Gy = 1 J/kg."@en ;
+    skos:exactMatch ncit:C18063 .
+
+dorrl:Sievert
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DosimetryUnit ;
+    rdfs:label "Sievert"@en ;
+    skos:prefLabel "Sievert"@en ;
+    skos:altLabel "Sv"@en ;
+    skos:notation "Sv" ;
+    skos:definition "SI unit of equivalent and effective dose; 1 Sv = 1 J/kg (radiation-weighted)."@en ;
+    skos:exactMatch ncit:C42553 .
+
+dorrl:Becquerel
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DosimetryUnit ;
+    rdfs:label "Becquerel"@en ;
+    skos:prefLabel "Becquerel"@en ;
+    skos:altLabel "Bq"@en ;
+    skos:notation "Bq" ;
+    skos:definition "SI unit of radioactivity; 1 Bq = 1 nuclear disintegration per second."@en ;
+    skos:exactMatch ncit:C42562 .
+
+dorrl:CoulombPerKg
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DosimetryUnit ;
+    rdfs:label "Coulomb per kilogram"@en ;
+    skos:prefLabel "Coulomb per kilogram"@en ;
+    skos:altLabel "C/kg"@en ;
+    skos:notation "C/kg" ;
+    skos:definition "SI unit of radiation exposure."@en ;
+    skos:note "OLS4 check: QUDT."@en .
+
+dorrl:Rad
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DosimetryUnit ;
+    rdfs:label "Rad"@en ;
+    skos:prefLabel "Rad"@en ;
+    skos:altLabel "rad"@en ;
+    skos:notation "rad" ;
+    skos:definition "Legacy unit of absorbed dose; 1 rad = 0.01 Gy."@en ;
+    skos:exactMatch ncit:C18064 .
+
+dorrl:Rem
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DosimetryUnit ;
+    rdfs:label "Rem"@en ;
+    skos:prefLabel "Rem"@en ;
+    skos:altLabel "rem"@en ;
+    skos:notation "rem" ;
+    skos:definition "Legacy unit of dose equivalent; 1 rem = 0.01 Sv."@en ;
+    skos:exactMatch uo:0000140 .
+
+dorrl:Curie
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DosimetryUnit ;
+    rdfs:label "Curie"@en ;
+    skos:prefLabel "Curie"@en ;
+    skos:altLabel "Ci"@en ;
+    skos:notation "Ci" ;
+    skos:definition "Legacy unit of radioactivity; 1 Ci = 3.7e10 Bq."@en ;
+    skos:exactMatch uo:0000133 ;
+    skos:closeMatch ncit:C48466 .
+
+dorrl:Roentgen
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DosimetryUnit ;
+    rdfs:label "Roentgen"@en ;
+    skos:prefLabel "Roentgen"@en ;
+    skos:altLabel "R"@en ;
+    skos:notation "R" ;
+    skos:definition "Legacy unit of radiation exposure; 1 R = 2.58e-4 C/kg."@en ;
+    skos:exactMatch snomed:282720000 .
+
+# =============================================================================
+# LAYER 4 — RADIONUCLIDES (subclasses of Radionuclide)
+# =============================================================================
+
+dorrl:Cs137
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Radionuclide ;
+    rdfs:label "Caesium-137"@en ;
+    skos:prefLabel "Caesium-137"@en ;
+    skos:altLabel "Cs-137"@en , "137Cs"@en ;
+    skos:definition "Fission product radionuclide with 30.17-year half-life; primary decay beta-minus, 661.7 keV gamma."@en ;
+    skos:exactMatch chebi:196959 ;
+    skos:closeMatch mesh:C000614989 ;
+    dorrl:halfLife "30.17 years" .
+
+dorrl:Co60
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Radionuclide ;
+    rdfs:label "Cobalt-60"@en ;
+    skos:prefLabel "Cobalt-60"@en ;
+    skos:altLabel "Co-60"@en , "60Co"@en ;
+    skos:definition "Activation product with 5.27-year half-life; used in teletherapy and industrial radiography."@en ;
+    dorrl:halfLife "5.27 years" .
+
+dorrl:I131
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Radionuclide ;
+    rdfs:label "Iodine-131"@en ;
+    skos:prefLabel "Iodine-131"@en ;
+    skos:altLabel "I-131"@en , "131I"@en ;
+    skos:definition "Fission product/medical radionuclide with 8.02-day half-life; target organ thyroid."@en ;
+    dorrl:halfLife "8.02 days" .
+
+dorrl:Sr90
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Radionuclide ;
+    rdfs:label "Strontium-90"@en ;
+    skos:prefLabel "Strontium-90"@en ;
+    skos:altLabel "Sr-90"@en , "90Sr"@en ;
+    skos:definition "Fission product with 28.8-year half-life; daughter Y-90; target organ bone."@en ;
+    dorrl:halfLife "28.8 years" .
+
+dorrl:Ra226
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Radionuclide ;
+    rdfs:label "Radium-226"@en ;
+    skos:prefLabel "Radium-226"@en ;
+    skos:altLabel "Ra-226"@en , "226Ra"@en ;
+    skos:definition "Natural decay series radionuclide; 1600-year half-life; daughter Rn-222."@en ;
+    dorrl:halfLife "1600 years" .
+
+dorrl:Pu239
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Radionuclide ;
+    rdfs:label "Plutonium-239"@en ;
+    skos:prefLabel "Plutonium-239"@en ;
+    skos:altLabel "Pu-239"@en , "239Pu"@en ;
+    skos:definition "Transuranium weapons-grade radionuclide; 24,110-year half-life; target organs bone, liver, lung."@en ;
+    dorrl:halfLife "24110 years" .
+
+dorrl:U238
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Radionuclide ;
+    rdfs:label "Uranium-238"@en ;
+    skos:prefLabel "Uranium-238"@en ;
+    skos:altLabel "U-238"@en , "238U"@en ;
+    skos:definition "Natural primordial radionuclide; 4.47-billion-year half-life; depleted uranium."@en ;
+    dorrl:halfLife "4470000000 years" .
+
+dorrl:Am241
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Radionuclide ;
+    rdfs:label "Americium-241"@en ;
+    skos:prefLabel "Americium-241"@en ;
+    skos:altLabel "Am-241"@en , "241Am"@en ;
+    skos:definition "Transuranium radionuclide; 432.2-year half-life; used in smoke detectors and calibration."@en ;
+    dorrl:halfLife "432.2 years" .
+
+# =============================================================================
+# LAYER 5 — DECAY MODES (subclasses of DecayMode)
+# =============================================================================
+
+dorrl:AlphaDecay
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DecayMode ;
+    rdfs:label "Alpha decay"@en ;
+    skos:prefLabel "Alpha decay"@en ;
+    skos:altLabel "α decay"@en ;
+    skos:definition "Radioactive decay in which an alpha particle (helium nucleus) is emitted."@en ;
+    skos:exactMatch rbo:00015004 .
+
+dorrl:BetaMinusDecay
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DecayMode ;
+    rdfs:label "Beta-minus decay"@en ;
+    skos:prefLabel "Beta-minus decay"@en ;
+    skos:altLabel "β⁻ decay"@en ;
+    skos:definition "Radioactive decay producing an electron and antineutrino from neutron conversion."@en ;
+    skos:closeMatch rbo:00015005 ;
+    skos:note "RBO_00015005 'beta decay' is closeMatch (broader — covers beta-minus, beta-plus, and electron capture together). dorrl:BetaMinusDecay is the narrower subtype."@en .
+
+dorrl:BetaPlusDecay
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DecayMode ;
+    rdfs:label "Beta-plus decay"@en ;
+    skos:prefLabel "Beta-plus decay"@en ;
+    skos:altLabel "β⁺ decay"@en , "Positron decay"@en ;
+    skos:definition "Radioactive decay producing a positron and neutrino from proton conversion."@en .
+
+dorrl:ElectronCapture
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DecayMode ;
+    rdfs:label "Electron capture"@en ;
+    skos:prefLabel "Electron capture"@en ;
+    skos:altLabel "K-capture"@en ;
+    skos:definition "Radioactive decay in which an inner orbital electron is captured by the nucleus."@en .
+
+dorrl:IsomericTransition
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DecayMode ;
+    rdfs:label "Isomeric transition"@en ;
+    skos:prefLabel "Isomeric transition"@en ;
+    skos:altLabel "IT"@en ;
+    skos:definition "Decay of a nuclear isomer to a lower energy state with gamma emission."@en .
+
+dorrl:NeutronEmission
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DecayMode ;
+    rdfs:label "Neutron emission"@en ;
+    skos:prefLabel "Neutron emission"@en ;
+    skos:definition "Radioactive decay mode in which a neutron is emitted from the nucleus."@en .
+
+dorrl:SpontaneousFission
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DecayMode ;
+    rdfs:label "Spontaneous fission"@en ;
+    skos:prefLabel "Spontaneous fission"@en ;
+    skos:altLabel "SF"@en ;
+    skos:definition "Nuclear decay in which a heavy nucleus splits without external bombardment."@en .
+
+dorrl:GammaDecay
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DecayMode ;
+    rdfs:label "Gamma decay"@en ;
+    skos:prefLabel "Gamma decay"@en ;
+    skos:altLabel "Gamma emission"@en ;
+    skos:definition "Nuclear decay in which a gamma photon is emitted from an excited nucleus."@en ;
+    skos:note "CONFIRMED MINT. RBO_00015006 is 'subatomic process' — confirmed live on EBI OLS4. dorrl:GammaDecay stands as Canon Management mint."@en .
+
+# =============================================================================
+# LAYER 6 — TISSUES (subclasses of Tissue)
+# Per ICRP Publication 103 tissue weighting factors.
+# =============================================================================
+
+dorrl:RedBoneMarrow
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Red bone marrow"@en ;
+    skos:prefLabel "Red bone marrow"@en ;
+    skos:altLabel "Active bone marrow"@en ;
+    skos:closeMatch snomed:14016003 ;
+    skos:note "fma_id: MISSING — OLS4 FMA check required."@en ;
+    dorrl:tissueWeightingFactor "0.12"^^xsd:decimal .
+
+dorrl:Colon
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Colon"@en ;
+    skos:closeMatch fma:7201 ;
+    skos:closeMatch snomed:71854001 ;
+    skos:note "SNOMED 71854001 unverified."@en ;
+    dorrl:tissueWeightingFactor "0.12"^^xsd:decimal .
+
+dorrl:Lung
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Lung"@en ;
+    skos:exactMatch fma:7195 ;
+    skos:closeMatch snomed:39607008 ;
+    skos:note "SNOMED 39607008 verified=true."@en ;
+    dorrl:tissueWeightingFactor "0.12"^^xsd:decimal .
+
+dorrl:Stomach
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Stomach"@en ;
+    skos:closeMatch fma:7199 ;
+    skos:closeMatch snomed:69695003 ;
+    dorrl:tissueWeightingFactor "0.12"^^xsd:decimal .
+
+dorrl:Breast
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Breast"@en ;
+    skos:altLabel "Mammary gland"@en ;
+    skos:closeMatch fma:57991 ;
+    skos:closeMatch snomed:80248007 ;
+    dorrl:tissueWeightingFactor "0.12"^^xsd:decimal .
+
+dorrl:Gonads
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Gonads"@en ;
+    skos:altLabel "Gonadal tissue"@en ;
+    skos:closeMatch snomed:43174007 ;
+    skos:note "fma_id: MISSING — OLS4 FMA check required."@en ;
+    dorrl:tissueWeightingFactor "0.08"^^xsd:decimal .
+
+dorrl:Liver
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Liver"@en ;
+    skos:closeMatch fma:7197 ;
+    skos:closeMatch snomed:10200004 ;
+    dorrl:tissueWeightingFactor "0.04"^^xsd:decimal .
+
+dorrl:Bladder
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Urinary bladder"@en ;
+    skos:altLabel "Bladder"@en ;
+    skos:closeMatch fma:15900 ;
+    skos:closeMatch snomed:89837001 ;
+    dorrl:tissueWeightingFactor "0.04"^^xsd:decimal .
+
+dorrl:Thyroid
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Thyroid gland"@en ;
+    skos:altLabel "Thyroid"@en ;
+    skos:closeMatch fma:9603 ;
+    skos:closeMatch snomed:69748006 ;
+    dorrl:tissueWeightingFactor "0.04"^^xsd:decimal .
+
+dorrl:Oesophagus
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Oesophagus"@en ;
+    skos:altLabel "Esophagus"@en ;
+    skos:closeMatch fma:7131 ;
+    skos:closeMatch snomed:32849002 ;
+    skos:note "Preferred label: British spelling per SNOMED FSN."@en ;
+    dorrl:tissueWeightingFactor "0.04"^^xsd:decimal .
+
+dorrl:LensOfEye
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Lens of eye"@en ;
+    skos:altLabel "Crystalline lens"@en , "Ocular lens"@en ;
+    skos:closeMatch snomed:78076003 ;
+    skos:note "fma_id: MISSING — OLS4 FMA check required. Critical: ICRP Pub.118 lens dose limit (20 mSv/yr)."@en ;
+    dorrl:tissueWeightingFactor "0.01"^^xsd:decimal .
+
+dorrl:BoneSurface
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Bone surface"@en ;
+    skos:altLabel "Endosteum"@en ;
+    skos:closeMatch snomed:272673000 ;
+    skos:note "fma_id: MISSING — OLS4 FMA check required."@en ;
+    dorrl:tissueWeightingFactor "0.01"^^xsd:decimal .
+
+dorrl:RemainderTissues
+    a owl:Class ;
+    rdfs:subClassOf dorrl:Tissue ;
+    rdfs:label "Remainder tissues"@en ;
+    skos:definition "ICRP-defined aggregate of tissues not individually specified in the tissue weighting factor table."@en ;
+    skos:note "CONFIRMED MINT. No fma_id or snomed_id. ICRP regulatory construct, not anatomical entity."@en ;
+    dorrl:tissueWeightingFactor "0.12"^^xsd:decimal .
+
+# =============================================================================
+# LAYER 7 — BIOLOGICAL EFFECTS (subclasses of BiologicalEffect)
+# =============================================================================
+
+dorrl:DeterministicEffect
+    a owl:Class ;
+    rdfs:subClassOf dorrl:BiologicalEffect ;
+    rdfs:label "Deterministic radiation effect"@en ;
+    skos:prefLabel "Deterministic radiation effect"@en ;
+    skos:altLabel "Tissue reaction"@en , "Non-stochastic effect"@en ;
+    skos:definition "Radiation health effect with a threshold dose below which the effect does not occur; severity increases with dose."@en ;
+    skos:note "CONFIRMED MINT. No OLS4 class for deterministic radiation effect. dorrl:DeterministicEffect stands as Canon Management mint."@en .
+
+dorrl:StochasticEffect
+    a owl:Class ;
+    rdfs:subClassOf dorrl:BiologicalEffect ;
+    rdfs:label "Stochastic radiation effect"@en ;
+    skos:prefLabel "Stochastic radiation effect"@en ;
+    skos:altLabel "Probabilistic radiation effect"@en ;
+    skos:definition "Radiation health effect whose probability increases with dose; no threshold; cancer and heritable effects."@en ;
+    skos:note "CONFIRMED MINT. No OLS4 class for radiation-specific stochastic effect."@en .
+
+dorrl:ARS
+    a owl:Class ;
+    rdfs:subClassOf dorrl:BiologicalEffect ;
+    rdfs:label "Acute radiation syndrome"@en ;
+    skos:prefLabel "Acute radiation syndrome"@en ;
+    skos:altLabel "ARS"@en , "Radiation sickness"@en ;
+    skos:definition "Clinical syndrome resulting from whole-body or significant partial-body irradiation at high dose rates."@en ;
+    skos:exactMatch mondo:0033938 ;
+    skos:closeMatch rbo:00010047 ;
+    skos:closeMatch mesh:D054508 .
+
+dorrl:RadiationCataract
+    a owl:Class ;
+    rdfs:subClassOf dorrl:BiologicalEffect ;
+    rdfs:label "Radiation-induced cataract"@en ;
+    skos:prefLabel "Radiation-induced cataract"@en ;
+    skos:altLabel "Radiation cataract"@en ;
+    skos:definition "Lens opacity resulting from ionizing radiation exposure."@en .
+
+dorrl:Teratogenesis
+    a owl:Class ;
+    rdfs:subClassOf dorrl:BiologicalEffect ;
+    rdfs:label "Radiation teratogenesis"@en ;
+    skos:prefLabel "Radiation teratogenesis"@en ;
+    skos:definition "Radiation-induced abnormal fetal development."@en .
+
+dorrl:HeroditaryEffects
+    a owl:Class ;
+    rdfs:subClassOf dorrl:BiologicalEffect ;
+    rdfs:label "Hereditary radiation effects"@en ;
+    skos:prefLabel "Hereditary radiation effects"@en ;
+    skos:altLabel "Heritable effects"@en , "Hereditary effects"@en ;
+    skos:definition "Radiation-induced genetic changes transmissible to offspring."@en ;
+    skos:note "ICRP uses 'heritable effects' — altLabel critical for alignment."@en .
+
+dorrl:GenomicInstability
+    a owl:Class ;
+    rdfs:subClassOf dorrl:BiologicalEffect ;
+    rdfs:label "Radiation-induced genomic instability"@en ;
+    skos:prefLabel "Radiation-induced genomic instability"@en ;
+    skos:altLabel "Genomic instability"@en ;
+    skos:definition "Increased rate of genome alterations in progeny of irradiated cells."@en .
+
+dorrl:BystandardEffect
+    a owl:Class ;
+    rdfs:subClassOf dorrl:BiologicalEffect ;
+    rdfs:label "Radiation bystander effect"@en ;
+    skos:prefLabel "Radiation bystander effect"@en ;
+    skos:altLabel "Bystander effect"@en ;
+    skos:definition "Biological effects in non-irradiated cells adjacent to irradiated cells."@en .
+
+dorrl:RadiationInducedCancer
+    a owl:Class ;
+    rdfs:subClassOf dorrl:BiologicalEffect ;
+    rdfs:label "Radiation-induced malignancy"@en ;
+    skos:prefLabel "Radiation-induced malignancy"@en ;
+    skos:altLabel "Radiation-induced cancer"@en ;
+    skos:definition "Malignant neoplasm causally attributable to ionizing radiation exposure."@en .
+
+# =============================================================================
+# LAYER 8 — EXPOSURE PATHWAYS (subclasses of ExposurePathway)
+# =============================================================================
+
+dorrl:Inhalation
+    a owl:Class ;
+    rdfs:subClassOf dorrl:ExposurePathway ;
+    rdfs:label "Inhalation exposure"@en ;
+    skos:prefLabel "Inhalation exposure"@en ;
+    skos:altLabel "Inhalation"@en ;
+    skos:definition "Uptake of radioactive material via the respiratory tract."@en ;
+    skos:exactMatch pbpko:00242 ;
+    skos:closeMatch mesh:D019570 .
+
+dorrl:Ingestion
+    a owl:Class ;
+    rdfs:subClassOf dorrl:ExposurePathway ;
+    rdfs:label "Ingestion exposure"@en ;
+    skos:prefLabel "Ingestion exposure"@en ;
+    skos:altLabel "Ingestion"@en ;
+    skos:definition "Uptake of radioactive material via the gastrointestinal tract."@en .
+
+dorrl:ExternalIrradiation
+    a owl:Class ;
+    rdfs:subClassOf dorrl:ExposurePathway ;
+    rdfs:label "External irradiation"@en ;
+    skos:prefLabel "External irradiation"@en ;
+    skos:altLabel "External exposure"@en ;
+    skos:definition "Radiation exposure from a source outside the body."@en .
+
+dorrl:SkinAbsorption
+    a owl:Class ;
+    rdfs:subClassOf dorrl:ExposurePathway ;
+    rdfs:label "Skin absorption"@en ;
+    skos:prefLabel "Skin absorption"@en ;
+    skos:altLabel "Percutaneous absorption"@en ;
+    skos:definition "Uptake of radioactive material through intact or damaged skin."@en .
+
+dorrl:WoundContamination
+    a owl:Class ;
+    rdfs:subClassOf dorrl:ExposurePathway ;
+    rdfs:label "Wound contamination"@en ;
+    skos:prefLabel "Wound contamination"@en ;
+    skos:altLabel "Wound intake"@en ;
+    skos:definition "Internal contamination via open wound or puncture."@en ;
+    skos:note "Possible confirmed mint — radiation-specific context."@en .
+
+dorrl:Submersion
+    a owl:Class ;
+    rdfs:subClassOf dorrl:ExposurePathway ;
+    rdfs:label "Submersion exposure"@en ;
+    skos:prefLabel "Submersion exposure"@en ;
+    skos:altLabel "Submersion"@en ;
+    skos:definition "Radiation exposure from immersion in a radioactive cloud or water body."@en ;
+    skos:note "Likely confirmed mint — radiation-specific."@en .
+
+dorrl:GroundShine
+    a owl:Class ;
+    rdfs:subClassOf dorrl:ExposurePathway ;
+    rdfs:label "Ground shine"@en ;
+    skos:prefLabel "Ground shine"@en ;
+    skos:altLabel "Groundshine"@en ;
+    skos:definition "External gamma dose from radionuclides deposited on the ground surface."@en ;
+    skos:note "CONFIRMED MINT — radiation emergency planning term."@en .
+
+dorrl:MedicalExposure
+    a owl:Class ;
+    rdfs:subClassOf dorrl:ExposurePathway ;
+    rdfs:label "Medical exposure"@en ;
+    skos:prefLabel "Medical exposure"@en ;
+    skos:definition "Intentional radiation exposure for diagnostic or therapeutic medical purposes."@en .
+
+# =============================================================================
+# LAYER 9 — COMPLIANCE WORKFLOW CLASSES
+# Core DORRL anchor: ComplianceCommitment → DoseOfRecord chain
+# Title 32 CFR 2002.4(h) basis
+# =============================================================================
+
+dorrl:ComplianceCommitment
+    a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;
+    rdfs:label "Compliance commitment"@en ;
+    skos:definition "The formal point where a governing authority's goal becomes a specific obligation on a specific actor in a specific domain workflow. Core DORRL anchor under Title 32 CFR 2002.4(h)."@en ;
+    skos:note "PENDING v1.0.3 rename: dorrl:ComplianceCommitment → dorrl:GoalCommitment. Parent class also pending change: gist:Commitment → gist:ContingentObligation (confirmed in gistCore14.0.0.ttl). ComplianceCommitment is internal Canon Management terminology — not from CMMC documents, DFARS, or any government source."@en ;
+    skos:note "CTA evidence type: evidence_policy_document. Closes: IR.L2-3.6.1."@en .
+
+dorrl:DoseOfRecord
+    a owl:Class ;
+    rdfs:subClassOf gist:Content ;
+    rdfs:label "Dose of record"@en ;
+    skos:definition "The official, RSO-certified radiation dose attributed to a worker for a defined monitoring period. The primary compliance artifact in DORRL."@en ;
+    skos:note "minCardinality 1: BASED_ON DoseReading. minCardinality 1: ATTESTED_BY RSO."@en .
+
+dorrl:DoseReading
+    a owl:Class ;
+    rdfs:subClassOf gist:Magnitude ;
+    rdfs:label "Dose reading"@en ;
+    skos:definition "A measured dose value from a dosimeter device. The unit is the magnitude; the unit of measure is expressed via dorrl:DosimetryUnit."@en ;
+    skos:note "DoseReading → gist:Magnitude is correct. Magnitude = the measured amount; UnitOfMeasure = the standard. These are disjoint in gist 14."@en .
+
+dorrl:CalibrationEvent
+    a owl:Class ;
+    rdfs:subClassOf gist:Event ;
+    rdfs:label "Calibration event"@en ;
+    skos:definition "A scheduled or triggered event in which a dosimeter device is calibrated against a reference standard."@en ;
+    skos:note "Part of ComplianceEvent chain: CalibrationEvent → BadgeDoseMetric → DoseReading → DoseOfRecord."@en .
+
+dorrl:DoseEvent
+    a owl:Class ;
+    rdfs:subClassOf gist:Event ;
+    rdfs:label "Dose event"@en ;
+    skos:definition "An exposure event in which a worker receives a measurable radiation dose."@en ;
+    skos:note "CTA evidence type: evidence_log. Closes: AU.L2-3.3.1, AU.L2-3.3.2."@en .
+
+dorrl:RSO
+    a owl:Class ;
+    rdfs:subClassOf gist:Person ;
+    rdfs:label "Radiation safety officer"@en ;
+    skos:prefLabel "RSO"@en ;
+    skos:definition "The authorized individual responsible for radiation protection program oversight and dose record certification."@en .
+
+dorrl:RSOReleaseEvent
+    a owl:Class ;
+    rdfs:subClassOf gist:Event ;
+    rdfs:label "RSO release event"@en ;
+    skos:definition "The event in which an RSO publishes a DoseOfRecord to the worker and/or regulatory authority via myLDR or equivalent."@en ;
+    skos:note "GAP-05 (HIGH — production blocker): RSOReleaseEvent nodes cannot be populated until myLDR Signature Suite export field is mapped. Cypher gate: Invariant 6 — enforces Landauer silent email gap fix."@en .
+
+dorrl:Worker
+    a owl:Class ;
+    rdfs:subClassOf gist:Person ;
+    rdfs:label "Radiation worker"@en ;
+    skos:altLabel "Worker"@en ;
+    skos:definition "An occupationally exposed individual whose radiation dose is monitored and recorded."@en .
+
+dorrl:ALARAThreshold
+    a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;
+    rdfs:label "ALARA threshold"@en ;
+    skos:definition "A dose level at which ALARA review or intervention is triggered within the DORRL system."@en ;
+    skos:note "CONFIRMED MINT. OLS4 may have ALARA as a concept but not a threshold class."@en .
+
+dorrl:ALARAResponseEvent
+    a owl:Class ;
+    rdfs:subClassOf gist:Event ;
+    rdfs:label "ALARA response event"@en ;
+    skos:definition "System-triggered workflow event when a worker's dose approaches an ALARA threshold."@en ;
+    skos:note "CONFIRMED MINT. Cypher gate: Must link to triggering ALARANotification and RSO attribution. Closes: RA.L2-3.11.2."@en .
+
+dorrl:BadgeDoseMetric
+    a owl:Class ;
+    rdfs:subClassOf gist:Magnitude ;
+    rdfs:label "Badge dose metric"@en ;
+    skos:definition "A dosimetry measurement record type associated with a physical badge dosimeter reading."@en ;
+    skos:note "CONFIRMED MINT. Part of ComplianceEvent chain."@en .
+
+dorrl:VocabularyMapping
+    a owl:Class ;
+    rdfs:subClassOf gist:Content ;
+    rdfs:label "Vocabulary mapping"@en ;
+    skos:definition "A meta-class representing a term alignment between DORRL and an external vocabulary or standard."@en ;
+    skos:note "CONFIRMED MINT. Meta-ontology class for cross-system traceability."@en .
+
+dorrl:IDRAccessAuditTrail
+    a owl:Class ;
+    rdfs:subClassOf gist:Content ;
+    rdfs:label "IDR access audit trail"@en ;
+    skos:definition "Security audit record of access events to the Individual Dose Registry."@en ;
+    skos:note "CONFIRMED MINT. Cypher gate: Must have Worker attribution and timestamp. CTA evidence type: evidence_access_control_list. Closes: AC.L2-3.1.1, AC.L2-3.1.5."@en .
+
+dorrl:AuthenticationBypassEvent
+    a owl:Class ;
+    rdfs:subClassOf gist:Event ;
+    rdfs:label "Authentication bypass event"@en ;
+    skos:definition "Security event recording an attempted or successful circumvention of authentication controls."@en ;
+    skos:note "CONFIRMED MINT. Cypher gate: Must have RSO authorization and documented justification. CTA evidence type: evidence_mfa_enforcement_report. Closes: IA.L2-3.5.3."@en .
+
+dorrl:CloudBoundaryDefinition
+    a owl:Class ;
+    rdfs:subClassOf gist:Content ;
+    rdfs:label "Cloud boundary definition"@en ;
+    skos:definition "Infrastructure classification specifying the boundary of cloud-hosted components within the DORRL system boundary."@en ;
+    skos:note "CONFIRMED MINT. CUI enclave for SaaS dosimetry is an authentication layer, not a network segment. This class makes that boundary a first-class ontology object rather than a documentation exercise. Cypher gates: denyByDefaultConfirmed must be true; must have RSO owner. Closes: SC.L2-3.13.6, SC.L1-3.13.1."@en .
+
+dorrl:WearVerificationEvent
+    a owl:Class ;
+    rdfs:subClassOf gist:Event ;
+    rdfs:label "Wear verification event"@en ;
+    skos:definition "Compliance event confirming a worker wore their assigned dosimeter during a monitored period."@en ;
+    skos:note "CONFIRMED MINT. DORRL compliance workflow."@en .
+
+dorrl:RaySafeDevice
+    a owl:Class ;
+    rdfs:subClassOf dorrl:DosimeterDevice ;
+    rdfs:label "RaySafe dosimetry device"@en ;
+    skos:prefLabel "RaySafe dosimetry device"@en ;
+    skos:altLabel "RaySafe device"@en ;
+    skos:definition "Dosimetry hardware manufactured by RaySafe (Fluke Health Solutions); brand-specific device class."@en ;
+    skos:note "CONFIRMED MINT. Brand-specific — will not exist in OLS4. CTA evidence type: evidence_device_inventory. Closes: CM.L2-3.4.1."@en .
+
+# =============================================================================
+# OWL RESTRICTIONS — compliance anchor minCardinality constraints
+# =============================================================================
+
+dorrl:DoseOfRecord
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty dorrl:basedOn ;
+        owl:minCardinality 1
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty dorrl:attestedBy ;
+        owl:minCardinality 1
+    ] .
+
+# End of DORRL Ontology v1.0.2
