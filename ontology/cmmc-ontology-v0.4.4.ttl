@@ -1,0 +1,1769 @@
+###############################################################################
+# CMMC / NIST SP 800-171 Compliance Domain Ontology
+# Version: 0.4.4 (merged master)
+# Generated: 2026-04-25 (v0.4.4 merge date; Phase 2 of runtime build)
+# Stage: Verb 4 — /ontogize (Session 11 v0.4.4 delta merged into v0.4.3 master)
+#
+# v0.4.4 merge provenance (this revision):
+#   Base:  cmmc-ontology-v0.4.3.ttl (2026-04-19, merged master, 1189 lines)
+#   Delta: cmmc-ontology-v0.4.4-delta.ttl (2026-04-25, ~33 KB, 539 lines)
+#   Conflicts: none. Purely additive. No v0.4.3 declarations modified.
+#   Reasoner gate: HermiT PASS on delta-only run (logged 2026-04-25 by
+#                  PostToolUse hook). Re-validation after merge expected
+#                  to PASS — additive-only.
+#   Phase 2 enforcement note: APOC is NOT installed on the cmmc-neo4j
+#                  container (confirmed 2026-04-25). Invariant 18's
+#                  payload-side check (missingFields list ↔ JSON payload
+#                  agreement) lives in the cmmc-write MCP server's Python
+#                  validation layer, not in Cypher. Neo4j shape constraints
+#                  (Invariant 17 status vocab, Invariant 18 missingFields
+#                  presence, Invariant 19 default-pending) are enforced
+#                  by the MCP server before the parameterized Cypher write.
+#
+# v0.4.4 additions (cross-reference: cmmc-ontology-v0.4.4-delta.ttl):
+#   Classes:           cmmc:LoopArtifact, cmmc:MorningReviewItem,
+#                      cmmc:Routine, cmmc:ControlObjective
+#   Object properties: cmmc:concerns, cmmc:proposedBy, cmmc:resolvedBy
+#   Datatype props:    cmmc:itemId, cmmc:proposedAt, cmmc:gapKind,
+#                      cmmc:targetGraph, cmmc:summary, cmmc:payload,
+#                      cmmc:status, cmmc:missingFields
+#   Named individuals: cmmc:Routine-Loop1, cmmc:Routine-Loop2,
+#                      cmmc:Routine-Manual
+#   SKOS schemes:      cmmc:GapKindScheme, cmmc:MorningReviewStatusScheme
+#   Invariants:        cmmc:Invariant17-MorningReviewFSM,
+#                      cmmc:Invariant18-MissingDataRequiresMissingFields,
+#                      cmmc:Invariant19-MorningReviewItemDefaultPending
+#   SHACL NodeShape:   cmmc:MorningReviewItemShape
+#
+# v0.4.3 merge provenance (preserved from prior master):
+#   Base:  cmmc-ontology.ttl v0.4.2 (2026-04-18, 89 KB)
+#   Delta: cmmc-ontology-v0.4.3-delta.ttl (2026-04-18 12:56 PM, 12 KB)
+#
+# Merge decisions applied (documented here, not hidden):
+#   (1) Namespace normalization: delta declared @prefix cmmc: <http://cmmc.dod/ontology#> .
+#       Merged into v0.4.2's canonical @prefix cmmc: <http://canonmanagement.io/cmmc/ontology#> .
+#       Rationale: v0.4.2 is the larger established base with existing downstream consumers
+#       (Neo4j load scripts, notebook sources). Changing base namespace would break every
+#       consumer. All delta class and property IRIs rewritten to the base namespace.
+#
+#   (2) GATE-FCA-CLEARED rewritten to use cmmc:PRECEDED_BY instead of cmmc:parentEngagement.
+#       Rationale: cmmc:parentEngagement does NOT exist in v0.4.2. cmmc:PRECEDED_BY
+#       (Engagement → Engagement) already exists in v0.4.2 Section 4 (v0.3.0) and has the
+#       correct semantics — "a successor engagement that follows a prior engagement."
+#       No new property added; gate becomes immediately runnable against existing graph.
+#
+#   (3) Cross-reference stubs flagged in delta Section 4 — resolution:
+#         - cmmc:parentEngagement       → NOT ADDED (superseded by PRECEDED_BY rewrite)
+#         - cmmc:boundByRemediationPlan → ADDED (Finding → RemediationPlan)
+#         - cmmc:imposesOversight       → ADDED (Engagement → OversightRequirement)
+#         - cmmc:extendsInvariant       → ADDED as owl:AnnotationProperty
+#         - cmmc:sourceRef              → ADDED as owl:AnnotationProperty
+#
+#   (4) cmmc:Invariant class minted. v0.4.2 had no first-class Invariant representation
+#       (invariants were expressed as owl:Restriction blocks or Cypher comments).
+#       The v0.4.3 delta declares cmmc:Invariant16-FCA-Cleared as a cmmc:Invariant
+#       instance, which requires the class to exist. Added as a lightweight
+#       documentation class, not as a reasoning construct.
+#
+#   (5) cmmc:Invariant16 named individual minted at merge site so that
+#       cmmc:extendsInvariant cmmc:Invariant16 resolves. The existing Invariant 16
+#       block (GATE-FCA) is preserved unchanged; the named individual provides the
+#       anchor for the v0.4.3 extension to reference.
+#
+# Open items carried forward from Session 8 canon (not resolved by this merge):
+#   - SUBJECT_TO_ENGAGEMENT missing from Step-18 load order (handoff doc, not TTL)
+#   - Authority as first-class node vs string (deferred to future delta)
+#   - PartialPass outcome for PCA (deferred to Taxonomize)
+#   - EngagementClosureRecord class (candidate for v0.4.4)
+#
+# McComb principles applied in delta:
+#   (4) ~80% of compliance activity = obligations → both new classes are Commitments
+#   (5) Separate ontology from taxonomy → phaseOfRemediation is enum datatype, not subclass
+#   (7) Invariants are the enforcement layer → GATE-FCA-CLEARED patches asymmetry
+#
+# Output files (parallel to this):
+#   cmmc-ontology-v0.4.3.ttl               (this file — merged master)
+#   cmmc-ontology-v0.4.3-delta.ttl         (preserved — 2026-04-18 original delta)
+#   cmmc-ontology.ttl                      (preserved — v0.4.2 base, untouched)
+#   neo4j-handoff-notes-v0.4.3.md          (regenerate from this file)
+###############################################################################
+
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix gist:   <https://ontologies.semanticarts.com/gist/> .
+@prefix canon:  <https://canonmanagement.io/vocab/cmmc/> .
+@prefix cmmc:   <http://canonmanagement.io/cmmc/ontology#> .
+@prefix swrl:   <http://www.w3.org/2003/11/swrl#> .
+@prefix swrlb:  <http://www.w3.org/2003/11/swrlb#> .
+
+###############################################################################
+# ONTOLOGY DECLARATION
+###############################################################################
+
+<http://canonmanagement.io/cmmc/ontology>
+    a owl:Ontology ;
+    rdfs:label "CMMC / NIST SP 800-171 Compliance Domain Ontology"@en ;
+    rdfs:comment "Formal OWL ontology for the CMMC 2.0 and NIST SP 800-171 compliance domain. Built using Dave McComb data-centric principles. Layer 3 CMMC seed extended from v0.1.1 → v0.2.0 → v0.3.0 → v0.4.0 → v0.4.2 → v0.4.3 → v0.4.4. v0.4.3 added OversightRequirement and RemediationPlan as subclasses of ContractObligation, phaseOfRemediation datatype property on Finding, and GATE-FCA-CLEARED extension to Invariant 16. v0.4.4 adds the runtime morning-review queue substrate: cmmc:LoopArtifact + cmmc:MorningReviewItem (gist:Commitment lineage), cmmc:Routine (gist:Behavior, with named individuals Loop1/Loop2/Manual), cmmc:ControlObjective (gist:Commitment, finer-grained than Control), three object properties (concerns/proposedBy/resolvedBy), eight datatype properties, two SKOS concept schemes (GapKindScheme/MorningReviewStatusScheme), Invariants 17–19 (FSM, missing-data → missingFields, default-pending), and the cmmc:MorningReviewItemShape SHACL NodeShape. Phase 2 enforcement: APOC absent on cmmc-neo4j, so Invariant 18 payload validation runs in the cmmc-write MCP server's Python layer."@en ;
+    owl:versionInfo "0.4.4" ;
+    owl:imports <https://ontologies.semanticarts.com/gist/> .
+
+###############################################################################
+# SECTION 1: SEED CLASSES (v0.1.1) — RETAINED AND EXTENDED
+# Layer 3 — CMMC seed. These classes existed in v0.1.1. Only property
+# extensions are added here; class definitions are preserved from seed.
+###############################################################################
+
+### 1.1 — Control (Layer 3B — NEVER MODIFY CLASS BOUNDARY)
+cmmc:Control a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;
+    rdfs:label "NIST SP 800-171 Control"@en ;
+    rdfs:comment "A single NIST SP 800-171 requirement. 110 controls across 14 families define CMMC Level 2 compliance. Each control is a documented obligation assessed by C3PAO or DIBCAC."@en ;
+    skos:exactMatch canon:Control .
+    ### gist check: subclass of gist:Commitment — standards-based rule defining compliance obligation ✓
+    ### Layer 3B: Canonical NIST control definitions. NEVER modify class boundary. ✓
+
+### 1.2 — ControlFamily (Layer 3B — NEVER MODIFY CLASS BOUNDARY)
+cmmc:ControlFamily a owl:Class ;
+    rdfs:subClassOf gist:Category ;
+    rdfs:label "NIST SP 800-171 Control Family"@en ;
+    rdfs:comment "One of the 14 NIST SP 800-171 control families (AC, AT, AU, CM, IA, IR, MA, MP, PS, PE, RA, CA, SC, SI). Groups related controls by function domain."@en ;
+    skos:exactMatch canon:ControlFamily .
+    ### gist check: subclass of gist:Category — classification grouping of controls ✓
+
+### 1.3 — Finding
+cmmc:Finding a owl:Class ;
+    rdfs:subClassOf gist:Event ;
+    rdfs:label "Assessment Finding"@en ;
+    rdfs:comment "A determination made during an assessment that a control is Met, Not Met, Not Applicable, or Not Reviewed. Findings are produced by AssessmentOrganization actors and drive POA&M creation."@en ;
+    skos:exactMatch canon:Finding .
+    ### gist check: subclass of gist:Event — occurrence changing compliance state ✓
+
+### 1.4 — Asset (EXTENDED in v0.2.0: assetCategory, processesCUI)
+cmmc:Asset a owl:Class ;
+    rdfs:subClassOf gist:Equipment ;
+    rdfs:label "Asset"@en ;
+    rdfs:comment "Any hardware, software, cloud resource, or physical system within or adjacent to the CMMC assessment scope. All assets must be categorized using the five official CMMC Asset Categories."@en ;
+    skos:exactMatch canon:Asset .
+    ### gist check: subclass of gist:Equipment — physical/logical system resource ✓
+    ### v0.2.0 EXTENSION: assetCategory property added; OTICSystem subclass added
+
+### 1.5 — AuthorizedUser
+cmmc:AuthorizedUser a owl:Class ;
+    rdfs:subClassOf gist:Person ;
+    rdfs:label "Authorized User"@en ;
+    rdfs:comment "An individual with documented authorization to access CUI systems. Distinct from Visitor (who requires escort when accessing controlled areas) and Unauthorized Maintenance Personnel. Note: NARA defines 'Authorized Holder' (32 CFR 2002.4(b)) more broadly to include agencies and organizations; for CMMC scope, individual-level access modeling is appropriate."@en ;
+    skos:exactMatch canon:AuthorizedUser .
+    ### gist check: subclass of gist:Person ✓
+
+### 1.6 — PhysicalLocation
+cmmc:PhysicalLocation a owl:Class ;
+    rdfs:subClassOf gist:Place ;
+    rdfs:label "Physical Location"@en ;
+    rdfs:comment "A physical site subject to PE (Physical & Environmental Protection) controls: server rooms, manufacturing floors, storage areas. Requires badge/key fob access, visitor logs, and surveillance cameras."@en ;
+    skos:exactMatch canon:PhysicalLocation .
+    ### gist check: subclass of gist:Place ✓
+
+### 1.7 — Evidence (EXTENDED in v0.2.0: SSP, POA&M, BoE become subclasses)
+cmmc:Evidence a owl:Class ;
+    rdfs:subClassOf gist:Content ;
+    rdfs:label "Compliance Evidence"@en ;
+    rdfs:comment "Any artifact, log, screenshot, policy document, or report produced to demonstrate implementation of NIST SP 800-171 controls. Parent class for SSP, POA&M, BoE, and all policy artifacts."@en ;
+    skos:exactMatch canon:Evidence .
+    ### gist check: subclass of gist:Content — information artifact ✓
+    ### v0.2.0 EXTENSION: SystemSecurityPlan, PlanOfActionAndMilestones, BodyOfEvidence added as subclasses
+
+### 1.8 — Department
+cmmc:Department a owl:Class ;
+    rdfs:subClassOf gist:Organization ;
+    rdfs:label "Department"@en ;
+    rdfs:comment "An organizational unit within a defense contractor responsible for specific CUI handling, access, or compliance activities."@en ;
+    skos:exactMatch canon:Department .
+    ### gist check: subclass of gist:Organization — organizational subdivision ✓
+
+### 1.9 — ContractObligation (EXTENDED in v0.2.0: DFARSClause subclass, clauseIdentifier property)
+### (EXTENDED in v0.4.3: OversightRequirement and RemediationPlan added as subclasses)
+cmmc:ContractObligation a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;
+    rdfs:label "Contract Obligation"@en ;
+    rdfs:comment "A documented obligation between DoD and a defense contractor arising from a contract clause, regulation, or executive order. Parent class for all DFARS clauses, regulatory obligations, oversight requirements (v0.4.3), and remediation plans (v0.4.3)."@en ;
+    skos:exactMatch canon:ContractObligation .
+    ### gist check: subclass of gist:Commitment — contractual obligation creating bilateral duties ✓
+    ### v0.2.0 EXTENSION: DFARSClause subclass added; clauseIdentifier property added
+    ### v0.4.3 EXTENSION: OversightRequirement, RemediationPlan subclasses added (Section 2.15, 2.16)
+
+### 1.10 — CUICategory
+cmmc:CUICategory a owl:Class ;
+    rdfs:subClassOf gist:Category ;
+    rdfs:label "CUI Category"@en ;
+    rdfs:comment "Classification of Controlled Unclassified Information by handling requirements, per the NARA CUI Registry (32 CFR Part 2002; EO 13556). CUI Basic (32 CFR 2002.4(f)): authorizing law/reg does not specify handling controls; NIST SP 800-171 baseline applies. CUI Specified (32 CFR 2002.4(k)): authorizing law/reg specifies handling controls that differ from or exceed CUI Basic (e.g., ITAR, EAR, NNPI). Note: Limited Dissemination Controls (e.g., NOFORN) are marking modifiers, NOT CUI categories — see cmmc:LimitedDisseminationControl."@en ;
+    skos:exactMatch canon:CUICategory .
+    ### gist check: subclass of gist:Category — classification type ✓
+
+### 1.11 — Engagement (EXTENDED in v0.2.0: SSP, BoE, POA&M object properties; assessmentTier)
+cmmc:Engagement a owl:Class ;
+    rdfs:subClassOf gist:Activity ;
+    rdfs:label "Assessment Engagement"@en ;
+    rdfs:comment "A formal CMMC or NIST SP 800-171 assessment engagement between an AssessmentOrganization and an OrganizationSeekingCertification. Types: C3PAO (Level 2), DIBCAC (Level 3), DIBCAC Basic/Medium/High NIST assessment."@en ;
+    skos:exactMatch canon:Engagement .
+    ### gist check: subclass of gist:Activity — coordinated assessment activity ✓
+    ### v0.2.0 EXTENSION: hasSystemSecurityPlan, hasBodyOfEvidence, hasPoam object properties; assessmentTier
+
+###############################################################################
+# SECTION 2: NEW CLASSES (v0.2.0 → v0.4.3) — DELTA ADDITIONS
+# Layer 3 / Layer 4 — new classes confirmed by Delta Reports.
+###############################################################################
+
+### 2.1 — DefenseContractor
+cmmc:DefenseContractor a owl:Class ;
+    rdfs:subClassOf gist:Organization ;
+    rdfs:label "Defense Contractor"@en ;
+    rdfs:comment "A company in the Defense Industrial Base (DIB) that holds DoD contracts requiring handling of Controlled Unclassified Information. Subject to DFARS 252.204-7012, 252.204-7020, and 252.204-7021. Parent class for OrganizationSeekingCertification, PrimeContractor, and Subcontractor roles."@en ;
+    skos:exactMatch canon:DefenseContractor .
+    ### gist check: subclass of gist:Organization ✓
+    ### Delta: new in v0.2.0 — seed had no Actor parent class for contractors
+
+### 2.2 — OrganizationSeekingCertification (OSC) [Design Decision #6]
+cmmc:OrganizationSeekingCertification a owl:Class ;
+    rdfs:subClassOf cmmc:DefenseContractor ;
+    rdfs:label "Organization Seeking Certification (OSC)"@en ;
+    rdfs:comment "Official CMMC term for the defense contractor undergoing CMMC Level 2 formal assessment. The entity whose environment and practices are evaluated by the C3PAO. Distinct from the AssessmentOrganization (which conducts the assessment). OSC must have a Unique Entity Identifier (UEI) in SAM.gov."@en ;
+    skos:exactMatch canon:OrganizationSeekingCertification .
+    ### gist check: subclass of DefenseContractor → gist:Organization ✓
+    ### Design Decision #6: OSC as subclass of DefenseContractor; hasAssessmentStatus + uniqueEntityIdentifier
+
+### 2.3 — ExternalServiceProvider (ESP)
+cmmc:ExternalServiceProvider a owl:Class ;
+    rdfs:subClassOf gist:Organization ;
+    rdfs:label "External Service Provider (ESP)"@en ;
+    rdfs:comment "Official CMMC 2.0 term for external entities (people, technology, or facilities) providing services to a defense contractor that could impact CMMC compliance. Encompasses Cloud Service Providers (CSPs), Managed Service Providers (MSPs), Managed Security Service Providers (MSSPs), and cybersecurity-as-a-service entities. TAB C maps which controls are fully inherited, partially inherited, or not applicable from the ESP."@en ;
+    skos:exactMatch canon:ExternalServiceProvider .
+    ### gist check: subclass of gist:Organization ✓
+    ### Delta: new in v0.2.0; official CMMC term from corpus
+
+### 2.4 — AssessmentOrganization
+cmmc:AssessmentOrganization a owl:Class ;
+    rdfs:subClassOf gist:Organization ;
+    rdfs:label "Assessment Organization"@en ;
+    rdfs:comment "An organization authorized to conduct CMMC or NIST SP 800-171 assessments. Subtypes by actorType enumeration: C3PAO (Level 2 CMMC), DIBCAC (Level 3 CMMC and NIST Basic/Medium/High), 3PAO (FedRAMP Moderate Equivalency). A C3PAO may not consult for an organization it is assessing."@en ;
+    skos:exactMatch canon:AssessmentOrganization .
+    ### gist check: subclass of gist:Organization ✓
+    ### Delta: new in v0.2.0; covers C3PAO, DIBCAC, 3PAO actor types from taxonomy
+
+### 2.5 — SystemSecurityPlan
+cmmc:SystemSecurityPlan a owl:Class ;
+    rdfs:subClassOf cmmc:Evidence ;
+    rdfs:label "System Security Plan (SSP)"@en ;
+    rdfs:comment "The primary compliance document describing how an organization implements each of the 110 NIST SP 800-171 controls (320 assessment objectives). Must include network architecture diagram and CUI flow diagram. For FedRAMP Moderate Equivalency BoE, also requires ISCP, IRP, CMP, and FIPS 199 categorization as annexes."@en ;
+    skos:exactMatch canon:SystemSecurityPlan .
+    ### gist check: subclass of Evidence → gist:Content ✓
+    ### Delta: new in v0.2.0; required by Engagement invariant
+
+### 2.6 — PlanOfActionAndMilestones [Design Decision #1 — dual-class resolved]
+cmmc:PlanOfActionAndMilestones a owl:Class ;
+    rdfs:subClassOf cmmc:Evidence ;
+    rdfs:label "Plan of Action and Milestones (POA&M)"@en ;
+    rdfs:comment "Document tracking remediation commitments for identified compliance deficiencies. Abstract parent class. Two distinct regimes exist with incompatible invariants; use subclasses CMMC_POAM and FedRAMP_Equivalency_POAM."@en ;
+    skos:exactMatch canon:PlanOfActionAndMilestones .
+    ### gist check: subclass of Evidence → gist:Content ✓
+    ### Design Decision #1: dual-class resolved as SEPARATE OWL subclasses (not single class with property)
+    ### Rationale: invariants are INCOMPATIBLE — CMMC allows 180-day open items on ~60 controls;
+    ###   FedRAMP Equivalency requires 100% closure at assessment date. Same class would require
+    ###   contradictory owl:Restriction on poamStatus. Separate subclasses are cleaner and safer.
+
+cmmc:CMMC_POAM a owl:Class ;
+    rdfs:subClassOf cmmc:PlanOfActionAndMilestones ;
+    rdfs:label "CMMC Plan of Action and Milestones"@en ;
+    rdfs:comment "POA&M under the CMMC regime. Remediation items must be resolved within 180 days of contract award. Approximately 50 controls cannot carry any open POA&M items — these require full implementation before certification. The remaining ~60 controls may carry open items with documented remediation plans."@en ;
+    skos:exactMatch canon:CMMC_POAM .
+    ### gist check: subclass of PlanOfActionAndMilestones → Evidence → gist:Content ✓
+
+cmmc:FedRAMP_Equivalency_POAM a owl:Class ;
+    rdfs:subClassOf cmmc:PlanOfActionAndMilestones ;
+    rdfs:label "FedRAMP Equivalency Plan of Action and Milestones"@en ;
+    rdfs:comment "POA&M under the FedRAMP Moderate Equivalency regime (derived from DFARS 252.204-7012). 100% compliance is required at the time the 3PAO assessment closes. No government Authorizing Official (AO) accepts residual risk. No open POA&M items are permissible at assessment conclusion."@en ;
+    skos:exactMatch canon:FedRAMP_Equivalency_POAM .
+    ### gist check: subclass of PlanOfActionAndMilestones → Evidence → gist:Content ✓
+
+### 2.7 — BodyOfEvidence
+cmmc:BodyOfEvidence a owl:Class ;
+    rdfs:subClassOf gist:Collection ;
+    rdfs:label "Body of Evidence (BoE)"@en ;
+    rdfs:comment "Organized collection of compliance artifacts. For CMMC: policies, screenshots, audit logs, SSP, POA&M. For FedRAMP Moderate Equivalency: formal 4-part package (SSP + annexes + SAP + SAR + POA&M) produced by a FedRAMP-recognized 3PAO."@en ;
+    skos:exactMatch canon:BodyOfEvidence .
+    ### gist check: subclass of gist:Collection — formal evidence package ✓
+
+### 2.8 — OTICSystem (OT/ICS) [Design Decision #4]
+cmmc:OTICSystem a owl:Class ;
+    rdfs:subClassOf cmmc:Asset ;
+    rdfs:label "Operational Technology / Industrial Control System (OT/ICS)"@en ;
+    rdfs:comment "Manufacturing and industrial control equipment that may process CUI (e.g., CNC machining centers, additive manufacturing systems, legacy embedded control systems). When OT/ICS processes CUI (e.g., G-code encoding controlled design specifications), it is a CMMC Specialized Asset requiring VLAN segmentation or air-gap isolation per SC family controls. CMMC 2.0 enduring exception provisions are unresolved by CMMC-AB — document gap in SSP with compensating controls. Cross-linked to FACET 9 Specialized Assets."@en ;
+    skos:exactMatch canon:OTICSystem .
+    ### gist check: subclass of Asset → gist:Equipment ✓
+    ### Design Decision #4: processesCUI + requiresIsolation properties on this class
+
+### 2.9 — DFARSClause
+cmmc:DFARSClause a owl:Class ;
+    rdfs:subClassOf cmmc:ContractObligation ;
+    rdfs:label "DFARS Clause"@en ;
+    rdfs:comment "A Defense Federal Acquisition Regulation Supplement clause creating compliance obligations for defense contractors. Three primary cybersecurity clauses: 252.204-7012 (CUI safeguarding + cyber incident reporting + FedRAMP Equivalency), 252.204-7020 (NIST 800-171 assessment disclosure + SPRS), 252.204-7021 (CMMC certification requirement — the primary CMMC clause). All implemented via DFARS Subpart 204.73."@en ;
+    skos:exactMatch canon:DFARSClause .
+    ### gist check: subclass of ContractObligation → gist:Commitment ✓
+    ### McComb: contractual clauses are speech acts creating bilateral compliance obligations
+
+### 2.10 — RegulatoryObligation
+cmmc:RegulatoryObligation a owl:Class ;
+    rdfs:subClassOf cmmc:ContractObligation ;
+    rdfs:label "Regulatory Obligation"@en ;
+    rdfs:comment "A compliance obligation arising from federal regulation or executive order (as opposed to a contract clause). Examples: 32 CFR Part 170 (CMMC Program rule), 32 CFR Part 2002 (CUI Program rule implementing EO 13556), 48 CFR Part 204 (FAR CMMC integration). Distinct from DFARSClause which arises from contract incorporation."@en ;
+    skos:exactMatch canon:RegulatoryObligation .
+    ### gist check: subclass of ContractObligation → gist:Commitment ✓
+
+### 2.11 — Affirmation [NEW v0.3.0]
+cmmc:Affirmation a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;
+    rdfs:label "CMMC Affirmation"@en ;
+    rdfs:comment "Annual senior official attestation of CMMC compliance, submitted to SPRS after each assessment and required every year thereafter. Source: 32 CFR Part 170 and CMMC About page (dodcio.defense.gov). Failure to submit annually causes the associated Engagement's CMMC Status to LAPSE. Level 3 contractors must maintain TWO active affirmations: one for L3 and one for the prerequisite L2 C3PAO engagement."@en ;
+    skos:exactMatch canon:Affirmation .
+    ### gist check: subclass of gist:Commitment — a periodic attestation obligation ✓
+
+### 2.12 — POAMCloseoutAssessment [NEW v0.3.0]
+cmmc:POAMCloseoutAssessment a owl:Class ;
+    rdfs:subClassOf cmmc:Engagement ;
+    rdfs:label "POA&M Closeout Assessment"@en ;
+    rdfs:comment "A CMMC assessment that evaluates ONLY the NOT MET requirements identified in the initial (parent) assessment. Distinct from a full certification assessment. Must be completed within 180 days of the Conditional CMMC Status Date. Three variants: L2 Self (by OSC), L2 C3PAO (by authorized C3PAO), L3 (by DCMA DIBCAC). POA&Ms are NOT permitted for Level 1. If not closed within 180 days, Conditional CMMC Status expires. Source: 32 CFR § 170.21."@en ;
+    skos:exactMatch canon:POAMCloseoutAssessment .
+    ### gist check: subclass of cmmc:Engagement → gist:Activity ✓
+
+### 2.13 — EnhancedRequirement [NEW v0.3.0] (Layer 3C)
+cmmc:EnhancedRequirement a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;
+    rdfs:label "NIST SP 800-172 Enhanced Requirement"@en ;
+    rdfs:comment "One of the 24 requirements selected from NIST SP 800-172 (Enhanced Security Requirements for Protecting CUI, February 2021) required for CMMC Level 3 certification. These 24 requirements are additional to the 110 NIST SP 800-171 Rev 2 controls assessed at Level 2. Source: 32 CFR § 170.14(c)(4) Table 1. CMMC Level 3 scope = 110 Layer 3B Control nodes + 24 Layer 3C EnhancedRequirement nodes. Do NOT merge with Layer 3B Control class; parallel Layer 3C graph."@en ;
+    skos:exactMatch canon:EnhancedRequirement .
+    ### gist check: subclass of gist:Commitment — security obligation for APT-level protection ✓
+
+### 2.14 — FlowDownObligation [NEW v0.4.1 — Traversal Gap 3 loopback]
+cmmc:FlowDownObligation a owl:Class ;
+    rdfs:subClassOf cmmc:ContractObligation ;
+    rdfs:label "Flow-Down Obligation"@en ;
+    rdfs:comment "A contractual compliance obligation that flows from a prime contractor's DFARS clause down to a subcontractor that processes, stores, or transmits CUI or provides operationally critical support. DFARS 252.204-7012 explicitly requires flow-down to all applicable subs; DFARS 252.204-7021 requires certification-level flow-down when the sub is CUI-handling. A FlowDownObligation is DERIVED_FROM a specific DFARSClause and creates a binding obligation on the sub equivalent to (or a scoped subset of) the prime's obligation. Source: DFARS 252.204-7012(c)(3); 32 CFR § 170.19."@en ;
+    skos:exactMatch canon:FlowDownObligation .
+    ### gist check: subClassOf ContractObligation → gist:Commitment — derived bilateral obligation ✓
+
+### 2.15 — OversightRequirement [NEW v0.4.3 — simulation-acme-recovery-path lifecycle feedback]
+### Covering concept: gist:Commitment via ContractObligation
+### Origin: FCA voluntary-disclosure consequences surface as ongoing reporting/monitoring
+###   burdens that outlast any single engagement. These are obligations, not events;
+###   they expire on a defined condition (time-based or action-based).
+### McComb principle 4: Commitments and Resources as the core — oversight is a sustained
+###   obligation, not a one-time event.
+cmmc:OversightRequirement a owl:Class ;
+    rdfs:subClassOf cmmc:ContractObligation ;      ### gist check: subclass of gist:Commitment via ContractObligation ✓
+    rdfs:label "Oversight Requirement"@en ;
+    rdfs:comment "An ongoing monitoring, reporting, or submission obligation imposed on a contractor by a contracting authority (e.g. DoD, DoJ) as a consequence of FCA exposure, voluntary disclosure, prior DECLINED outcome, or remediation agreement. Distinct from a one-time engagement; persists until an explicit expiration condition is met."@en ;
+    skos:exactMatch canon:OversightRequirement .
+
+### 2.16 — RemediationPlan [NEW v0.4.3 — simulation-acme-recovery-path lifecycle feedback]
+### Covering concept: gist:Commitment via ContractObligation (a program-level plan to
+###   bring a contractor into compliance — a commitment to a sequenced set of actions
+###   with deadlines).
+### McComb principle 5: Separate ontology from taxonomy — phases (Phase1–Phase4) are
+###   enum values on Finding via cmmc:phaseOfRemediation, not subclasses of RemediationPlan.
+cmmc:RemediationPlan a owl:Class ;
+    rdfs:subClassOf cmmc:ContractObligation ;      ### gist check: subclass of gist:Commitment via ContractObligation ✓
+    rdfs:label "Remediation Plan"@en ;
+    rdfs:comment "A program-level plan by which a contractor commits to close identified findings, restore SPRS score, and achieve (or restore) a target certification outcome. Sits above individual POA&M items and binds phased work across engagements. Distinct from CMMC_POAM (an engagement-scoped artifact); a RemediationPlan may orchestrate multiple POA&Ms and a POA&M Closeout Assessment."@en ;
+    skos:exactMatch canon:RemediationPlan .
+
+### 2.17 — Invariant [NEW v0.4.3 — minted at merge site for extendsInvariant resolution]
+### Lightweight documentation class. Represents a named invariant rule for cross-reference
+### purposes (e.g., Invariant16-FCA-Cleared extendsInvariant Invariant16). Not a reasoning
+### construct — the actual enforcement is still owl:Restriction blocks + Cypher queries.
+cmmc:Invariant a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;
+    rdfs:label "Ontology Invariant"@en ;
+    rdfs:comment "A named compliance invariant defined in this ontology. Lightweight documentation class that provides a stable anchor (via named individuals like cmmc:Invariant16) for the cmmc:extendsInvariant annotation property. Does NOT replace owl:Restriction or Cypher-gate enforcement — it is a metadata layer for versioning and traceability of invariants across ontology deltas. New in v0.4.3 to support GATE-FCA-CLEARED extension of Invariant 16."@en ;
+    skos:exactMatch canon:Invariant .
+
+
+###############################################################################
+# SECTION 3: DATATYPE PROPERTIES
+###############################################################################
+
+### On OrganizationSeekingCertification [Design Decision #6]
+cmmc:uniqueEntityIdentifier a owl:DatatypeProperty ;
+    rdfs:domain cmmc:OrganizationSeekingCertification ;
+    rdfs:range xsd:string ;
+    rdfs:label "Unique Entity Identifier (UEI)"@en ;
+    rdfs:comment "SAM.gov identifier required for all DoD contracting. Replaces the DUNS number. Required on TAB B Intake Form (Q7). Used by DoD to identify and track contractors in SPRS. Format: 12-character alphanumeric."@en .
+
+cmmc:hasAssessmentStatus a owl:DatatypeProperty ;
+    rdfs:domain cmmc:OrganizationSeekingCertification ;
+    rdfs:range xsd:string ;
+    rdfs:label "Assessment Status"@en ;
+    rdfs:comment "Current CMMC assessment status of the OSC. Enumerated values: PreAssessment, Scheduled, InProgress, Complete, Certified, Declined. See AssessmentStatus enum (Layer 4B)."@en .
+
+### On Asset [EXTENDED]
+cmmc:assetCategory a owl:DatatypeProperty ;
+    rdfs:domain cmmc:Asset ;
+    rdfs:range xsd:string ;
+    rdfs:label "CMMC Asset Category"@en ;
+    rdfs:comment "Official CMMC 2.0 asset category per TAB D Asset Inventory. Five values (owl:oneOf layer 4B): CUIAssets, SecurityProtectionAssets, ContractorRiskManagedAssets, SpecializedAssets, OutOfScopeAssets. All assets in scope must be categorized. Out-of-Scope Assets must be physically or logically separated from CUI Assets."@en .
+
+### On OTICSystem [Design Decision #4]
+cmmc:processesCUI a owl:DatatypeProperty ;
+    rdfs:domain cmmc:OTICSystem ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "Processes CUI"@en ;
+    rdfs:comment "True if the OT/ICS asset processes, stores, or transmits Controlled Unclassified Information (e.g., G-code encoding controlled design specifications). When true, the asset must be treated as a CUI Asset requiring VLAN segmentation or air-gap isolation."@en .
+
+cmmc:requiresIsolation a owl:DatatypeProperty ;
+    rdfs:domain cmmc:OTICSystem ;
+    rdfs:range xsd:string ;
+    rdfs:label "Requires Isolation Method"@en ;
+    rdfs:comment "Required network isolation method for OT/ICS assets processing CUI. Values: VLAN (logical network segmentation via VLAN), AirGap (physical disconnection from CUI network). Required when processesCUI=true. Maps to SC family controls (SC.L2-3.13.1, SC.L2-3.13.3)."@en .
+
+### On ContractObligation / DFARSClause [EXTENDED]
+cmmc:clauseIdentifier a owl:DatatypeProperty ;
+    rdfs:domain cmmc:ContractObligation ;
+    rdfs:range xsd:string ;
+    rdfs:label "Clause Identifier"@en ;
+    rdfs:comment "The official identifier for a DFARS clause or regulatory citation. Examples: '252.204-7012', '252.204-7020', '252.204-7021', '32 CFR Part 170', '32 CFR Part 2002', 'EO 13556'."@en .
+
+### On Finding
+cmmc:findingOutcome a owl:DatatypeProperty ;
+    rdfs:domain cmmc:Finding ;
+    rdfs:range xsd:string ;
+    rdfs:label "Finding Outcome"@en ;
+    rdfs:comment "Assessment determination for a control. Enumerated values: Met, NotMet, NotApplicable, NotReviewed. A 'NotMet' finding triggers POA&M creation (under CMMC) or must be remediated before assessment conclusion (under FedRAMP Equivalency)."@en .
+
+### On Engagement [EXTENDED]
+cmmc:assessmentTier a owl:DatatypeProperty ;
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range xsd:string ;
+    rdfs:label "Assessment Tier"@en ;
+    rdfs:comment "Assessment tier for this engagement. See NIST800171AssessmentTier enum (Section 6) for all valid values: BasicAssessment, MediumAssessment, HighAssessment (DFARS 7019/7020 path) + CMMC_L1, CMMC_L2_Self, CMMC_L2_C3PAO, CMMC_L3 (32 CFR 170 path). Updated v0.3.0 to encompass both DFARS and CMMC paths."@en .
+
+cmmc:conditionalCMMCStatusDate a owl:DatatypeProperty ;    ### NEW v0.3.0
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range xsd:date ;
+    rdfs:label "Conditional CMMC Status Date"@en ;
+    rdfs:comment "The date from which the 3-year CMMC Status validity and the 180-day POA&M closeout window are measured. Set when initial assessment concludes with open POA&M items (Conditional Status). If POA&M is closed by this date + 180 days, status upgrades to Final. Source: 32 CFR § 170.4."@en .
+
+cmmc:resultSubmissionSystem a owl:DatatypeProperty ;    ### NEW v0.3.0
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range xsd:string ;
+    rdfs:label "Result Submission System"@en ;
+    rdfs:comment "System of record where assessment results are submitted. See ResultSubmissionSystem enum (Section 6). Values: SPRS (for self-assessments: L1, L2_Self, Basic/Medium/High DFARS), eMASS (for third-party assessments: CMMC_L2_C3PAO, CMMC_L3). Affirmations always go to SPRS regardless of result system."@en .
+
+cmmc:priorSPRSScore a owl:DatatypeProperty ;    ### NEW v0.4.2 — /simulate lifecycle feedback
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "Prior SPRS Self-Assessment Score"@en ;
+    rdfs:comment "The SPRS score the contractor self-reported to PIEE/SPRS before this formal C3PAO or DIBCAC assessment. When this value differs materially from the assessed SPRS score (computed as 110 - SUM(sprsWeight WHERE findingOutcome='NotMet')), the delta may constitute evidence of false self-certification under the False Claims Act. Material discrepancy threshold: >= 10 points. Combined with poamProhibited=true NotMet findings, this feeds GATE-FCA."@en .
+
+cmmc:fcaExposureFlag a owl:DatatypeProperty ;    ### NEW v0.4.2 — /simulate lifecycle feedback
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "FCA Exposure Flag"@en ;
+    rdfs:comment "True if this engagement shows evidence of potential False Claims Act exposure: (1) priorSPRSScore exists AND (2) assessedSPRSScore < priorSPRSScore - 10 (material discrepancy) AND (3) at least one poamProhibited control is NotMet (fundamental failure unlikely to result from good-faith misinterpretation). Setting this flag does NOT constitute a legal determination — it is a compliance risk signal requiring legal counsel review. See GATE-FCA Cypher query in Invariant 16. As of v0.4.3, the flag now has a defined OFF transition via GATE-FCA-CLEARED; see Invariant 16 extension."@en .
+
+cmmc:assessmentScope a owl:DatatypeProperty ;    ### NEW v0.3.0
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range xsd:string ;
+    rdfs:label "Assessment Scope Identifier"@en ;
+    rdfs:comment "Identifier for the CMMC Assessment Scope (the specific set of assets, systems, and locations covered by this engagement). Used by Invariant 12 to enforce that a CMMC_L3 Engagement's prerequisite CMMC_L2_C3PAO Engagement has the same assessment scope. Defined per contractor system boundary."@en .
+
+### On Affirmation [NEW v0.3.0]
+cmmc:affirmationDate a owl:DatatypeProperty ;
+    rdfs:domain cmmc:Affirmation ;
+    rdfs:range xsd:date ;
+    rdfs:label "Affirmation Date"@en ;
+    rdfs:comment "Date on which the senior official submitted the CMMC compliance affirmation to SPRS. Annual affirmations must be submitted within 12 months of the prior affirmation date. Failure to meet annual deadline causes Engagement status to lapse."@en .
+
+cmmc:affirmingOfficialRole a owl:DatatypeProperty ;
+    rdfs:domain cmmc:Affirmation ;
+    rdfs:range xsd:string ;
+    rdfs:label "Affirming Official Role"@en ;
+    rdfs:comment "Role of the senior official submitting the affirmation. Typically: CEO, CIO, CISO, or Senior Official with authority to attest on behalf of the organization. Must have legal authority to bind the organization."@en .
+
+cmmc:affirmationLevel a owl:DatatypeProperty ;
+    rdfs:domain cmmc:Affirmation ;
+    rdfs:range xsd:string ;
+    rdfs:label "Affirmation Level"@en ;
+    rdfs:comment "CMMC level being affirmed. Values: CMMC_L1, CMMC_L2_Self, CMMC_L2_C3PAO, CMMC_L3. A Level 3 contractor must maintain TWO separate affirmations: one at CMMC_L3 and one at CMMC_L2_C3PAO."@en .
+
+cmmc:affirmationType a owl:DatatypeProperty ;    ### NEW v0.4.2 patch — Pinnacle clean-contractor loopback
+    rdfs:domain cmmc:Affirmation ;
+    rdfs:range xsd:string ;
+    rdfs:label "Affirmation Type"@en ;
+    rdfs:comment "Classifies which cycle of the affirmation obligation the record satisfies. Enumerated values: 'InitialCertification' (first affirmation at time of assessment completion — starts the annual clock), 'AnnualRenewal' (subsequent yearly affirmations required to maintain certification), 'PostConditional' (affirmation submitted after POA&M closeout converts Conditional status to Final). GATE-10 uses this property to distinguish missed annual renewals (violation) from pending initial affirmations (obligation clock not yet started)."@en .
+
+### On POAMCloseoutAssessment [NEW v0.3.0]
+cmmc:parentAssessmentId a owl:DatatypeProperty ;
+    rdfs:domain cmmc:POAMCloseoutAssessment ;
+    rdfs:range xsd:string ;
+    rdfs:label "Parent Assessment ID"@en ;
+    rdfs:comment "Identifier of the initial (parent) Engagement that produced the open POA&M items this closeout assessment addresses. Links the closeout assessment back to the original assessment for compliance chain traceability."@en .
+
+### On BodyOfEvidence [EXTENDED v0.3.0]
+cmmc:artifactHash a owl:DatatypeProperty ;
+    rdfs:domain cmmc:BodyOfEvidence ;
+    rdfs:range xsd:string ;
+    rdfs:label "Artifact Hash"@en ;
+    rdfs:comment "Cryptographic hash of the BoE artifact bundle, computed per the CMMC Hashing Guide (DoD CIO). Ensures BoE artifact integrity — verifies artifacts were not modified after assessment submission. Used by DIBCAC and C3PAO to verify tamper-evidence."@en .
+
+cmmc:hashAlgorithm a owl:DatatypeProperty ;
+    rdfs:domain cmmc:BodyOfEvidence ;
+    rdfs:range xsd:string ;
+    rdfs:label "Hash Algorithm"@en ;
+    rdfs:comment "Algorithm used to compute the artifactHash. Values per CMMC Hashing Guide: SHA-256 (minimum), SHA-512 (recommended). MD5 and SHA-1 are not acceptable."@en .
+
+### On ExternalServiceProvider
+cmmc:espType a owl:DatatypeProperty ;
+    rdfs:domain cmmc:ExternalServiceProvider ;
+    rdfs:range xsd:string ;
+    rdfs:label "ESP Type"@en ;
+    rdfs:comment "Subtype of External Service Provider. Values: CSP (Cloud Service Provider), MSP (Managed Service Provider), MSSP (Managed Security Service Provider), CybersecurityAsAService. Per TAB B Q36 subcategories: CSP, SecurityProtectionServices, CustomizedSoftware, HostedVPN, MSP."@en .
+
+### On PhysicalLocation [NEW v0.4.0 — from NARA CUI Glossary, 32 CFR 2002.4(j)]
+cmmc:isControlledEnvironment a owl:DatatypeProperty ;
+    rdfs:domain cmmc:PhysicalLocation ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "Is Controlled Environment"@en ;
+    rdfs:comment "True if this physical location qualifies as a 'Controlled Environment' under 32 CFR 2002.4(j): an area or space deemed to have adequate physical or procedural controls (barriers or managed access controls) to protect CUI from unauthorized access or disclosure. A PhysicalLocation with isControlledEnvironment=true maps to PE family controls (PE.L2-3.10.1 through PE.L2-3.10.6)."@en .
+
+### On CUICategory [NEW v0.4.0 — from NARA CUI Glossary, 32 CFR 2002.4]
+cmmc:cuiControlLevel a owl:DatatypeProperty ;
+    rdfs:domain cmmc:CUICategory ;
+    rdfs:range xsd:string ;
+    rdfs:label "CUI Control Level"@en ;
+    rdfs:comment "Whether this CUI Category is CUI Basic or CUI Specified, per 32 CFR 2002.4. Values: 'Basic' (controls from 32 CFR 2002 and CUI Registry baseline), 'Specified' (authorizing law or regulation contains additional handling controls that may be more stringent or simply different from CUI Basic). NARA ISOO assigns this value on the CUI Registry per-category page."@en .
+
+### On FlowDownObligation [NEW v0.4.1]
+cmmc:derivedFromClause a owl:DatatypeProperty ;
+    rdfs:domain cmmc:FlowDownObligation ;
+    rdfs:range xsd:string ;
+    rdfs:label "Derived From Clause"@en ;
+    rdfs:comment "The clauseIdentifier of the DFARS clause from which this flow-down obligation derives. Example: '252.204-7012'. Complements the DERIVED_FROM object property for cases where the DFARSClause node is not yet loaded as an instance."@en .
+
+### On PlanOfActionAndMilestones
+cmmc:poamStatus a owl:DatatypeProperty ;
+    rdfs:domain cmmc:PlanOfActionAndMilestones ;
+    rdfs:range xsd:string ;
+    rdfs:label "POA&M Status"@en ;
+    rdfs:comment "Status of a POA&M item. Values: Open, InProgress, Resolved, Overdue. Under CMMC_POAM: Open items are permissible for ~60 controls but must resolve within 180 days of award. Under FedRAMP_Equivalency_POAM: Open items are NOT permissible at assessment conclusion."@en .
+
+cmmc:resolutionDeadline a owl:DatatypeProperty ;
+    rdfs:domain cmmc:CMMC_POAM ;
+    rdfs:range xsd:date ;
+    rdfs:label "Resolution Deadline"@en ;
+    rdfs:comment "Date by which the CMMC POA&M item must be resolved. Must not exceed 180 days from contract award date. The CMMC_POAM_180day invariant enforces this constraint."@en .
+
+### On Control (Layer 3B — read-only, property only)
+cmmc:poamProhibited a owl:DatatypeProperty ;    ### NEW v0.4.2 — CLOSED v0.4.2 patch — 32 CFR § 170.21 weight-based rule applied
+    rdfs:domain cmmc:Control ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "POA&M Prohibited"@en ;
+    rdfs:comment "True if this control is on the CMMC no-POA&M list — meaning it must be fully implemented before any certification (Conditional or Final) can be granted. Authoritative rule per 32 CFR § 170.21: (1) ALL controls with sprsWeight=5 are prohibited (43 controls; SC.L2-3.13.11 excepted — may carry POA&M if partially implemented); (2) ALL controls with sprsWeight=3 are prohibited (23 controls); (3) Six specific 1-point controls are prohibited: AC.L2-3.1.20, AC.L2-3.1.22, CA.L2-3.12.4, PE.L2-3.10.3, PE.L2-3.10.4, PE.L2-3.10.5. Total prohibited: 72 controls."@en .
+
+cmmc:sprsWeight a owl:DatatypeProperty ;
+    rdfs:domain cmmc:Control ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "SPRS Weight"@en ;
+    rdfs:comment "Per-control weighted deduction value for SPRS self-assessment scoring per NIST SP 800-171 DoD Assessment Methodology v1.2.1. Values range from 1–5 deduction points per not-implemented control. Total score starts at 110."@en .
+
+### ---- NEW v0.4.3 datatype properties ---------------------------------
+
+### On OversightRequirement [NEW v0.4.3]
+cmmc:oversightType a owl:DatatypeProperty ;
+    rdfs:domain cmmc:OversightRequirement ;
+    rdfs:range xsd:string ;
+    rdfs:label "Oversight Type"@en ;
+    rdfs:comment "Category of oversight obligation. Enumerated values: 'FCA-VoluntaryDisclosure', 'DFARS-IncidentReporting', 'Monitorship', 'EnhancedReporting', 'SupplierTierAudit'. Managed as a SKOS concept scheme, not as subclasses."@en .
+
+cmmc:reportingCadence a owl:DatatypeProperty ;
+    rdfs:domain cmmc:OversightRequirement ;
+    rdfs:range xsd:string ;
+    rdfs:label "Reporting Cadence"@en ;
+    rdfs:comment "Frequency at which reports or attestations must be submitted. Enumerated values: 'AdHoc', 'Monthly', 'Quarterly', 'Semiannual', 'Annual', 'EventDriven'."@en .
+
+cmmc:oversightAuthority a owl:DatatypeProperty ;
+    rdfs:domain cmmc:OversightRequirement ;
+    rdfs:range xsd:string ;
+    rdfs:label "Oversight Authority"@en ;
+    rdfs:comment "The contracting or regulatory authority holding the oversight right. Typical values: 'DoD-OUSD-A&S', 'DoJ-Civil', 'DIBCAC', 'ContractingOfficer', 'Monitor'."@en .
+
+cmmc:expirationCondition a owl:DatatypeProperty ;
+    rdfs:domain cmmc:OversightRequirement ;
+    rdfs:range xsd:string ;
+    rdfs:label "Expiration Condition"@en ;
+    rdfs:comment "The condition under which the oversight obligation terminates. May be a temporal expression ('36 months from effective date'), an event reference ('upon GATE-FCA-CLEARED'), or a composite ('whichever is later'). Free-text because conditions are frequently negotiated per-engagement; downstream rules may parse."@en .
+
+### On Finding [NEW v0.4.3 — remediation phase tag]
+### Patch: extend cmmc:Finding with a remediation-phase tag so multi-phase
+### remediation plans can be expressed at the finding level without minting
+### Phase1..Phase4 as subclasses (per McComb principle 5 — enum not class).
+cmmc:phaseOfRemediation a owl:DatatypeProperty ;
+    rdfs:domain cmmc:Finding ;
+    rdfs:range xsd:string ;
+    rdfs:label "Phase of Remediation"@en ;
+    rdfs:comment "Phase identifier within a RemediationPlan indicating when this finding is slated for closure. Enumerated values: 'Phase1', 'Phase2', 'Phase3', 'Phase4'. Unset when the finding is outside any active RemediationPlan."@en .
+
+### Enum constraint for phaseOfRemediation (optional — many OWL tools accept this; SHACL would be stricter)
+_:phaseOfRemediationRange a rdfs:Datatype ;
+    owl:equivalentClass [
+        a rdfs:Datatype ;
+        owl:oneOf ( "Phase1" "Phase2" "Phase3" "Phase4" )
+    ] .
+
+
+###############################################################################
+# SECTION 4: OBJECT PROPERTIES (RELATIONSHIPS)
+###############################################################################
+
+### SEED PROPERTIES (retained from v0.1.1)
+
+cmmc:APPLIES_TO a owl:ObjectProperty ;
+    rdfs:domain cmmc:Control ;
+    rdfs:range cmmc:Asset ;
+    rdfs:label "APPLIES TO"@en ;
+    rdfs:comment "A NIST SP 800-171 control applies to one or more in-scope assets. The assetCategory of the target Asset determines which controls apply (e.g., OT/ICS Specialized Assets require SC family isolation controls)."@en .
+
+cmmc:BELONGS_TO a owl:ObjectProperty ;
+    rdfs:domain cmmc:Control ;
+    rdfs:range cmmc:ControlFamily ;
+    rdfs:label "BELONGS TO"@en ;
+    rdfs:comment "A control belongs to exactly one of the 14 NIST SP 800-171 control families."@en .
+
+cmmc:AFFECTS a owl:ObjectProperty ;
+    rdfs:domain cmmc:Finding ;
+    rdfs:range cmmc:Control ;
+    rdfs:label "AFFECTS"@en ;
+    rdfs:comment "A finding (Met/Not Met/NA/Not Reviewed) affects a specific NIST SP 800-171 control."@en .
+
+cmmc:THREATENS a owl:ObjectProperty ;
+    rdfs:domain cmmc:Finding ;
+    rdfs:range cmmc:Asset ;
+    rdfs:label "THREATENS"@en ;
+    rdfs:comment "A Not-Met finding threatens a specific asset's compliance posture."@en .
+
+cmmc:ASSIGNED_TO a owl:ObjectProperty ;
+    rdfs:domain cmmc:Control ;
+    rdfs:range cmmc:Department ;
+    rdfs:label "ASSIGNED TO"@en ;
+    rdfs:comment "A control is assigned to an organizational department for implementation responsibility."@en .
+
+cmmc:HAS_FINDING a owl:ObjectProperty ;
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:Finding ;
+    rdfs:label "HAS FINDING"@en ;
+    rdfs:comment "An engagement produces one or more assessment findings (one per control assessed)."@en .
+
+cmmc:SCOPE_INCLUDES a owl:ObjectProperty ;
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:Asset ;
+    rdfs:label "SCOPE INCLUDES"@en ;
+    rdfs:comment "An engagement's assessment scope includes specific assets. All included assets must have an assetCategory value."@en .
+
+cmmc:LOCATED_AT a owl:ObjectProperty ;
+    rdfs:domain cmmc:Asset ;
+    rdfs:range cmmc:PhysicalLocation ;
+    rdfs:label "LOCATED AT"@en ;
+    rdfs:comment "An asset is located at a physical location subject to PE family controls."@en .
+
+cmmc:OWNED_BY a owl:ObjectProperty ;
+    rdfs:domain cmmc:Asset ;
+    rdfs:range cmmc:DefenseContractor ;
+    rdfs:label "OWNED BY"@en ;
+    rdfs:comment "An asset is owned by a defense contractor. Note: Government-Furnished Equipment (GFE) Specialized Assets may be owned by the government but operated by the contractor."@en .
+
+cmmc:ATTESTED_BY a owl:ObjectProperty ;
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:AuthorizedUser ;
+    rdfs:label "ATTESTED BY"@en ;
+    rdfs:comment "An engagement's self-assessment or self-attestation is attested by an authorized user under penalty of perjury. For SPRS submission via PIEE portal."@en .
+
+cmmc:HANDLES a owl:ObjectProperty ;
+    rdfs:domain cmmc:DefenseContractor ;
+    rdfs:range cmmc:CUICategory ;
+    rdfs:label "HANDLES"@en ;
+    rdfs:comment "A defense contractor handles a specific CUI category (CUI-Basic or CUI-Specified subtypes: ITAR, EAR, NNPI per NARA CUI Registry). CUI type determines cloud platform requirements (e.g., ITAR/CTI requires GCC High, not standard GCC). Note: NOFORN is a Limited Dissemination Control (LDC), not a CUI category — see cmmc:LimitedDisseminationControl."@en .
+
+### NEW PROPERTIES (v0.2.0)
+
+cmmc:ASSESSED_BY a owl:ObjectProperty ;
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:AssessmentOrganization ;
+    rdfs:label "ASSESSED BY"@en ;
+    rdfs:comment "An assessment engagement is conducted by an AssessmentOrganization (C3PAO for Level 2, DIBCAC for Level 3 or NIST DoD Assessment tiers, 3PAO for FedRAMP Equivalency)."@en .
+
+cmmc:ASSESSES a owl:ObjectProperty ;
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:OrganizationSeekingCertification ;
+    rdfs:label "ASSESSES"@en ;
+    rdfs:comment "An engagement assesses an Organization Seeking Certification (OSC). The OSC's environment, documentation, and practices are evaluated against NIST SP 800-171 controls."@en .
+
+cmmc:HAS_SSP a owl:ObjectProperty ;
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:SystemSecurityPlan ;
+    rdfs:label "HAS SSP"@en ;
+    rdfs:comment "An engagement requires a System Security Plan. The SSP is the primary artifact demonstrating how 110 NIST SP 800-171 controls are implemented."@en .
+
+cmmc:HAS_POAM a owl:ObjectProperty ;
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:PlanOfActionAndMilestones ;
+    rdfs:label "HAS POAM"@en ;
+    rdfs:comment "An engagement may produce a Plan of Action and Milestones. Under CMMC, open POA&M items must resolve within 180 days. Under FedRAMP Equivalency, no open items are permitted at assessment close."@en .
+
+cmmc:HAS_BOE a owl:ObjectProperty ;
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:BodyOfEvidence ;
+    rdfs:label "HAS BOE"@en ;
+    rdfs:comment "An engagement produces or requires a Body of Evidence. For FedRAMP Moderate Equivalency: formal 4-part package (SSP + SAP + SAR + POA&M). For CMMC: policies, screenshots, logs, SSP, POA&M."@en .
+
+cmmc:PROVIDES_SERVICE_TO a owl:ObjectProperty ;
+    rdfs:domain cmmc:ExternalServiceProvider ;
+    rdfs:range cmmc:DefenseContractor ;
+    rdfs:label "PROVIDES SERVICE TO"@en ;
+    rdfs:comment "An ESP provides cloud, managed, or security services to a defense contractor. The ESP's service scope determines which NIST 800-171 controls are inherited (fully or partially) by the contractor per TAB C Inherited Requirements."@en .
+
+cmmc:HAS_INHERITED_CONTROL a owl:ObjectProperty ;
+    rdfs:domain cmmc:ExternalServiceProvider ;
+    rdfs:range cmmc:Control ;
+    rdfs:label "HAS INHERITED CONTROL"@en ;
+    rdfs:comment "An ESP fully or partially satisfies a NIST 800-171 control on behalf of the defense contractor. Documented in TAB C — Candidate C3PAO Inherited Requirements (DIBCAC pre-assessment package). Three states: FullyInherited, PartiallyInherited, NotApplicable."@en .
+
+cmmc:GOVERNED_BY a owl:ObjectProperty ;
+    rdfs:domain cmmc:DefenseContractor ;
+    rdfs:range cmmc:ContractObligation ;
+    rdfs:label "GOVERNED BY"@en ;
+    rdfs:comment "A defense contractor is governed by contract obligations (DFARS clauses, regulatory obligations). All DIB contractors with DoD contracts must comply with at minimum DFARS 252.204-7012."@en .
+
+cmmc:PRODUCES_FINDING_FOR a owl:ObjectProperty ;
+    rdfs:domain cmmc:AssessmentOrganization ;
+    rdfs:range cmmc:Finding ;
+    rdfs:label "PRODUCES FINDING FOR"@en ;
+    rdfs:comment "An assessment organization produces findings for each control assessed during an engagement."@en .
+
+### NEW PROPERTIES (v0.3.0)
+
+cmmc:HAS_AFFIRMATION a owl:ObjectProperty ;    ### NEW v0.3.0
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:Affirmation ;
+    rdfs:label "HAS AFFIRMATION"@en ;
+    rdfs:comment "An engagement requires annual affirmations. A CMMC_L3 Engagement requires two active affirmations (L3 + L2_C3PAO). Absence of current-year affirmation causes Engagement status to lapse. Source: 32 CFR Part 170, CMMC Phase 1 SPRS requirement."@en .
+
+cmmc:PRECEDED_BY a owl:ObjectProperty ;    ### NEW v0.3.0 — used by v0.4.3 GATE-FCA-CLEARED
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:Engagement ;
+    rdfs:label "PRECEDED BY"@en ;
+    rdfs:comment "An engagement is preceded by another engagement that must be completed first. Used primarily for the CMMC_L3 prerequisite: a CMMC_L3 Engagement is PRECEDED_BY a CMMC_L2_C3PAO Engagement covering the same assessment scope. Invariant 12 enforces this constraint. As of v0.4.3, also used by GATE-FCA-CLEARED to walk from a successor reassessment back to a prior fcaExposureFlag=true engagement."@en .
+
+cmmc:APPLIES_ENHANCED_REQ a owl:ObjectProperty ;    ### NEW v0.3.0
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:EnhancedRequirement ;
+    rdfs:label "APPLIES ENHANCED REQUIREMENT"@en ;
+    rdfs:comment "A CMMC_L3 Engagement applies all 24 Layer 3C EnhancedRequirements from NIST SP 800-172 in addition to the 110 Layer 3B Controls. Only applicable when assessmentTier = CMMC_L3. Source: 32 CFR § 170.14(c)(4) Table 1."@en .
+
+### NEW PROPERTIES (v0.4.1 — Traversal Gap loopback)
+
+cmmc:GOVERNS a owl:ObjectProperty ;    ### NEW v0.4.1 — Traversal Gap 1
+    rdfs:domain cmmc:DFARSClause ;
+    rdfs:range owl:Thing ;
+    rdfs:label "GOVERNS"@en ;
+    rdfs:comment "A DFARS clause governs the implementation of specific compliance requirements. Two primary uses: (1) DFARS 252.204-7020 GOVERNS all 110 cmmc:Control nodes — it mandates full NIST SP 800-171 implementation; (2) DFARS 252.204-7021 GOVERNS all 4 AssessmentGroup nodes — it mandates certification-level assessment of each group. Range is owl:Thing because the target types (Control and AssessmentGroup) share no common ancestor class in this ontology. This property is the critical join edge between the DFARSClause sub-graph and the Control/AssessmentGroup sub-graph."@en .
+
+cmmc:FLOWS_DOWN_TO a owl:ObjectProperty ;    ### NEW v0.4.1 — Traversal Gap 3
+    rdfs:domain cmmc:DFARSClause ;
+    rdfs:range cmmc:DefenseContractor ;
+    rdfs:label "FLOWS DOWN TO"@en ;
+    rdfs:comment "A DFARS clause flows its compliance obligations down to a subcontractor. DFARS 252.204-7012 explicitly requires flow-down to all subcontractors that process, store, or transmit CUI or provide operationally critical support (DFARS 252.204-7012(c)(3)). DFARS 252.204-7021 requires CMMC certification flow-down per 32 CFR § 170.19."@en .
+
+cmmc:DERIVED_FROM a owl:ObjectProperty ;    ### NEW v0.4.1 — Traversal Gap 3
+    rdfs:domain cmmc:FlowDownObligation ;
+    rdfs:range cmmc:DFARSClause ;
+    rdfs:label "DERIVED FROM"@en ;
+    rdfs:comment "A FlowDownObligation is derived from a specific parent DFARSClause. Links the sub's contractual obligation back to the prime's clause for compliance chain traceability."@en .
+
+cmmc:DEPENDS_ON a owl:ObjectProperty ;    ### NEW v0.4.2 — /simulate lifecycle feedback
+    rdfs:domain cmmc:Finding ;
+    rdfs:range cmmc:Finding ;
+    rdfs:label "DEPENDS ON"@en ;
+    rdfs:comment "A Finding (NotMet control) cannot be remediated until the prerequisite Finding it depends on has been resolved. Models remediation ordering constraints — particularly the CM family cascade where CM.L2-3.4.1 (baseline configs) is the root dependency for all other CM findings."@en .
+
+cmmc:REQUIRES_FEDRAMP_EQUIVALENCY a owl:ObjectProperty ;    ### NEW v0.4.1 — Traversal Gap 4
+    rdfs:domain cmmc:DFARSClause ;
+    rdfs:range cmmc:ExternalServiceProvider ;
+    rdfs:label "REQUIRES FEDRAMP EQUIVALENCY"@en ;
+    rdfs:comment "DFARS 252.204-7012 requires that any cloud service provider (ESP of type CSP) handling covered defense information demonstrate FedRAMP Moderate Equivalency through a 3PAO-assessed Body of Evidence. Source: DFARS 252.204-7012(b)(2)(ii)(D)."@en .
+
+### ---- NEW v0.4.3 object properties ---------------------------------
+
+### BOUND_BY_REMEDIATION_PLAN — links a Finding to the RemediationPlan that addresses it
+cmmc:BOUND_BY_REMEDIATION_PLAN a owl:ObjectProperty ;    ### NEW v0.4.3
+    rdfs:domain cmmc:Finding ;
+    rdfs:range cmmc:RemediationPlan ;
+    rdfs:label "BOUND BY REMEDIATION PLAN"@en ;
+    rdfs:comment "A Finding is bound by a program-level RemediationPlan that orchestrates its closure across phases. Complements cmmc:phaseOfRemediation (which tags WHICH phase) by linking to WHICH plan. A Finding may be bound to at most one active RemediationPlan; RemediationPlans may span multiple engagements."@en .
+
+### IMPOSES_OVERSIGHT — links an Engagement to OversightRequirements arising from its outcome
+cmmc:IMPOSES_OVERSIGHT a owl:ObjectProperty ;    ### NEW v0.4.3
+    rdfs:domain cmmc:Engagement ;
+    rdfs:range cmmc:OversightRequirement ;
+    rdfs:label "IMPOSES OVERSIGHT"@en ;
+    rdfs:comment "An Engagement's outcome (DECLINED, fcaExposureFlag=true, or voluntary disclosure) imposes one or more ongoing OversightRequirements on the contractor. Unlike HAS_FINDING (one-time assessment output), IMPOSES_OVERSIGHT creates sustained post-engagement obligations that must be tracked until their expirationCondition is met."@en .
+
+### ---- NEW v0.4.3 annotation properties ---------------------------------
+
+### extendsInvariant — documents when an invariant extends a prior-version invariant
+cmmc:extendsInvariant a owl:AnnotationProperty ;    ### NEW v0.4.3
+    rdfs:label "Extends Invariant"@en ;
+    rdfs:comment "Annotation property linking a new invariant (typically introduced in a delta patch) to the prior-version invariant it extends. Used for versioning traceability — when a delta adds a clause to an existing invariant rather than minting a new one, this property records the relationship. Example: cmmc:Invariant16-FCA-Cleared cmmc:extendsInvariant cmmc:Invariant16 ."@en .
+
+### sourceRef — documents the source artifact from which an ontology element was derived
+cmmc:sourceRef a owl:AnnotationProperty ;    ### NEW v0.4.3
+    rdfs:label "Source Reference"@en ;
+    rdfs:comment "Annotation property recording the source artifact (simulation, traversal, canon, or external document) from which an ontology element was derived. Free-text; typical values are filenames with optional section references. Example: 'simulation-acme-recovery-path.md — lifecycle feedback item 4'."@en .
+
+
+###############################################################################
+# SECTION 5: INVARIANTS (OWL RESTRICTIONS + OPEN GAP MARKERS)
+# These are the machine-actionable compliance gates.
+###############################################################################
+
+### INVARIANT 1: OSC must have a UEI [Design Decision #6]
+cmmc:OrganizationSeekingCertification rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty cmmc:uniqueEntityIdentifier ;
+    owl:minCardinality 1
+] .
+### Cypher: MATCH (o:OSC) WHERE o.uniqueEntityIdentifier IS NULL RETURN o AS missing_uei
+
+### INVARIANT 2: CMMC_POAM must have a resolution deadline ≤ 180 days
+cmmc:CMMC_POAM rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty cmmc:resolutionDeadline ;
+    owl:minCardinality 1
+] .
+### Cypher: MATCH (p:CMMC_POAM) WHERE p.poamStatus = 'Open'
+###   AND p.resolutionDeadline < date() RETURN p AS overdue_cmmc_poam
+
+### INVARIANT 3: FedRAMP_Equivalency_POAM cannot have open items at assessment close
+cmmc:FedRAMP_Equivalency_POAM rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty cmmc:poamStatus ;
+    owl:allValuesFrom [
+        a rdfs:Datatype ;
+        owl:oneOf ( "Resolved" "NotApplicable" )
+    ]
+] .
+
+### INVARIANT 4: Formal Engagement must have an SSP
+cmmc:Engagement rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty cmmc:HAS_SSP ;
+    owl:minCardinality 1
+] .
+
+### INVARIANT 5: OT/ICS processing CUI must have isolation method [Design Decision #4]
+cmmc:OTICSystem rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty cmmc:requiresIsolation ;
+    owl:someValuesFrom [
+        a rdfs:Datatype ;
+        owl:oneOf ( "VLAN" "AirGap" )
+    ]
+] .
+
+### INVARIANT 6: Finding outcome = NotMet on CMMC engagement triggers CMMC_POAM
+### Cypher: MATCH (e:Engagement)-[:HAS_FINDING]->(f:Finding {findingOutcome:'NotMet'})
+###   WHERE NOT EXISTS { (e)-[:HAS_POAM]->(:CMMC_POAM) }
+###   RETURN e AS missing_poam_for_notmet_finding
+
+### INVARIANT 7: Contractor Class precondition [Design Decision #3]
+### SWRL: AuthorizedUser(?u) ^ contractorClassCompleted(?u, true) -> escortRequired(?u, false)
+
+### INVARIANT 12: CMMC_L3 requires prior CMMC_L2_C3PAO with same assessment scope [NEW v0.3.0]
+### Cypher (GATE-9): as in v0.4.2 — enforces PRECEDED_BY chain for L3→L2_C3PAO prerequisite
+
+### INVARIANT 13: Annual Affirmation required or Engagement status lapses [NEW v0.3.0, patched v0.4.2]
+### Cypher (GATE-10): as in v0.4.2 — includes Final, Conditional in active-status check
+
+### INVARIANT 14: POAMCloseoutAssessment must complete within 180 days [NEW v0.3.0]
+cmmc:POAMCloseoutAssessment rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty cmmc:parentAssessmentId ;
+    owl:minCardinality 1
+] .
+
+### INVARIANT 15: DFARS breach detection — NotMet finding → clause breach [NEW v0.4.1]
+### Cypher (GATE-DFARS-BREACH): as in v0.4.2 — requires GOVERNS edges loaded
+
+### ---- INVARIANT 16: GATE-FCA — False Claims Act exposure signal [NEW v0.4.2] ----
+### Named individual minted in v0.4.3 to serve as anchor for extendsInvariant reference.
+cmmc:Invariant16 a cmmc:Invariant ;    ### Anchor minted in v0.4.3 for extendsInvariant target
+    rdfs:label "Invariant 16 — GATE-FCA (FCA Exposure Flag Ignition)"@en ;
+    rdfs:comment "Flag any engagement where the contractor's self-reported SPRS score exceeds the C3PAO-assessed score by 10+ points AND at least one fundamental (POA&M-prohibited) control is NotMet. Both conditions together indicate the gap is unlikely to reflect good-faith misinterpretation. Legal counsel review required. This is the IGNITION half of the gate — see Invariant16-FCA-Cleared (v0.4.3) for the CLEAR half."@en ;
+    cmmc:sourceRef "simulation-acme-15-notmet.md Step 6; /simulate lifecycle feedback (v0.4.2)" .
+
+### Cypher (GATE-FCA — ignition):
+### MATCH (e:Engagement)
+### WHERE e.priorSPRSScore IS NOT NULL
+### WITH e,
+###   (110 - [(e)-[:HAS_FINDING]->(f:Finding {findingOutcome:'NotMet'})-[:AFFECTS]->(c:Control) | c.sprsWeight | SUM]) AS assessedScore
+### WHERE e.priorSPRSScore - assessedScore >= 10
+### AND EXISTS {
+###   MATCH (e)-[:HAS_FINDING]->(f:Finding {findingOutcome:'NotMet'})-[:AFFECTS]->(c:Control {poamProhibited:true})
+### }
+### SET e.fcaExposureFlag = true
+### RETURN e AS fca_risk_engagement, e.priorSPRSScore AS claimed, assessedScore AS actual,
+###   e.priorSPRSScore - assessedScore AS delta
+### Natural language: Sets fcaExposureFlag=true on an Engagement meeting both conditions.
+###   NOTE: Risk signal only — NOT a legal determination. Requires attorney review.
+
+### ---- INVARIANT 16 EXTENSION: GATE-FCA-CLEARED [NEW v0.4.3] ----
+### Additive clause. Existing ignition behavior (flag ON when delta >= +10) is unchanged.
+### This extension defines when the flag turns OFF — previously undefined, leaving flagged
+### engagements permanently flagged even after successful remediation.
+###
+### DELTA PROVENANCE NOTE: v0.4.3-delta originally referenced a cmmc:parentEngagement
+### object property. That property does NOT exist in v0.4.2. This merged master rewrites
+### the invariant to use cmmc:PRECEDED_BY (Engagement → Engagement), which already exists
+### in v0.4.2 Section 4 (v0.3.0) with the correct semantics. No new property needed; the
+### gate becomes immediately runnable against the existing graph.
+###
+### Conditions for clearing (ALL must hold on a successor Engagement linked to the
+### flagged prior Engagement via PRECEDED_BY):
+###   (a) successor.assessedSPRSScore >= 88 (Conditional threshold)
+###       OR successor.hasAssessmentStatus = 'Final'
+###   (b) NO active OversightRequirement with oversightType='FCA-VoluntaryDisclosure'
+###       (every such instance must have reached its expirationCondition)
+###   (c) any applicable POAMCloseoutAssessment has been completed
+###
+### When all three conditions hold, the successor SHALL set fcaExposureFlag=false AND
+### emit a GATE-FCA-CLEARED marker for audit trail purposes.
+
+cmmc:Invariant16-FCA-Cleared a cmmc:Invariant ;
+    rdfs:label "GATE-FCA-CLEARED (Invariant 16 extension — v0.4.3)"@en ;
+    rdfs:comment "On a successor Engagement (PRECEDED_BY the flagged prior Engagement) where the prior had fcaExposureFlag=true: IF successor.assessedSPRSScore >= 88 OR successor.hasAssessmentStatus = 'Final' AND no active OversightRequirement of oversightType='FCA-VoluntaryDisclosure' AND any applicable POAMCloseoutAssessment is complete, THEN SET successor.fcaExposureFlag = false AND record GATE-FCA-CLEARED. Otherwise, fcaExposureFlag remains true on the successor (inherited from the prior)."@en ;
+    cmmc:extendsInvariant cmmc:Invariant16 ;
+    cmmc:sourceRef "simulation-acme-recovery-path.md — lifecycle feedback item 4" .
+
+### Cypher (GATE-FCA-CLEARED — uses PRECEDED_BY, not parentEngagement):
+### MATCH (successor:Engagement)-[:PRECEDED_BY]->(prior:Engagement {fcaExposureFlag:true})
+### WHERE (
+###     successor.assessedSPRSScore >= 88
+###     OR successor.hasAssessmentStatus = 'Final'
+###   )
+###   AND NOT EXISTS {
+###     MATCH (successor)-[:IMPOSES_OVERSIGHT]->(o:OversightRequirement {oversightType:'FCA-VoluntaryDisclosure'})
+###     WHERE o.status = 'Active'
+###   }
+###   AND (
+###     NOT EXISTS { MATCH (successor)-[:PRECEDED_BY*]-(p:POAMCloseoutAssessment) }
+###     OR EXISTS {
+###          MATCH (successor)-[:PRECEDED_BY*]-(p:POAMCloseoutAssessment)
+###          WHERE p.hasAssessmentStatus = 'Complete'
+###        }
+###   )
+### SET successor.fcaExposureFlag = false, successor.fcaClearedAt = datetime()
+### RETURN successor AS cleared_engagement, prior AS formerly_flagged,
+###   successor.fcaClearedAt AS cleared_timestamp
+
+
+###############################################################################
+# SECTION 6: OWL:ONEOF ENUMERATIONS (Layer 4B)
+# Controlled vocabulary values — NOT OWL classes.
+# Full v0.4.2 enumeration section retained unchanged. v0.4.3 adds no new enums;
+# OversightRequirement enum values (oversightType, reportingCadence) are handled
+# inline at the property level in Section 3 rather than as named individuals, per
+# McComb principle 5 (separate ontology from taxonomy — low-cardinality enums stay
+# as string enums pending Layer 4B concept scheme).
+###############################################################################
+
+### 6.1 — CMMC Asset Category [Design Decision #5]
+cmmc:CMMCAssetCategory a owl:Class ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:oneOf (
+            cmmc:CUIAssets
+            cmmc:SecurityProtectionAssets
+            cmmc:ContractorRiskManagedAssets
+            cmmc:SpecializedAssets
+            cmmc:OutOfScopeAssets
+        )
+    ] ;
+    rdfs:label "CMMC Asset Category"@en ;
+    rdfs:comment "Five official CMMC 2.0 asset categories per TAB D Asset Inventory. Every in-scope asset must be assigned exactly one category."@en .
+
+cmmc:CUIAssets a owl:NamedIndividual, cmmc:CMMCAssetCategory ;
+    rdfs:label "CUI Assets"@en ;
+    rdfs:comment "Assets that process, store, or transmit CUI. Always in-scope. Primary driver of NIST SP 800-171 control application."@en .
+
+cmmc:SecurityProtectionAssets a owl:NamedIndividual, cmmc:CMMCAssetCategory ;
+    rdfs:label "Security Protection Assets"@en ;
+    rdfs:comment "Assets providing security functions or capabilities (firewalls, SIEMs, IAM systems, endpoint security tools). In-scope because they protect CUI Assets."@en .
+
+cmmc:ContractorRiskManagedAssets a owl:NamedIndividual, cmmc:CMMCAssetCategory ;
+    rdfs:label "Contractor Risk Managed Assets"@en ;
+    rdfs:comment "Assets capable of but not intended to process CUI. NOT required to be physically or logically separated from CUI Assets. Contractor accepts risk; must document rationale in SSP."@en .
+
+cmmc:SpecializedAssets a owl:NamedIndividual, cmmc:CMMCAssetCategory ;
+    rdfs:label "Specialized Assets"@en ;
+    rdfs:comment "Assets with unique characteristics requiring special handling: GFE, IoT, OT/ICS, Restricted Information Systems, Test Equipment. Linked to OTICSystem class for OT/ICS assets."@en .
+
+cmmc:OutOfScopeAssets a owl:NamedIndividual, cmmc:CMMCAssetCategory ;
+    rdfs:label "Out-of-Scope Assets"@en ;
+    rdfs:comment "Assets that cannot process CUI. MUST be physically or logically separated from CUI Assets to maintain out-of-scope status. Failure to demonstrate separation requires recategorization."@en .
+
+### 6.2 — POA&M Regime Type (from taxonomy enum)
+cmmc:POAMRegimeType a owl:Class ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:oneOf (
+            cmmc:CMMC_POAM_180Day
+            cmmc:FedRAMP_Equivalency_POAM_100Pct
+        )
+    ] ;
+    rdfs:label "POA&M Regime Type"@en ;
+    rdfs:comment "Distinguishes between CMMC POA&M regime (180-day limit, partial open items allowed) and FedRAMP Equivalency POA&M regime (100% closure required at assessment date)."@en .
+
+cmmc:CMMC_POAM_180Day a owl:NamedIndividual, cmmc:POAMRegimeType ;
+    rdfs:label "CMMC POA&M (180-Day)"@en .
+
+cmmc:FedRAMP_Equivalency_POAM_100Pct a owl:NamedIndividual, cmmc:POAMRegimeType ;
+    rdfs:label "FedRAMP Equivalency POA&M (100% Required)"@en .
+
+### 6.3 — MFA Method Type [Design Decision #2]
+cmmc:MFAMethodType a owl:Class ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:oneOf (
+            cmmc:HardwareToken
+            cmmc:AuthenticatorApp
+            cmmc:SmartCard
+            cmmc:Biometric
+            cmmc:SMS_NonPreferred
+        )
+    ] ;
+    rdfs:label "MFA Method Type"@en .
+
+cmmc:HardwareToken a owl:NamedIndividual, cmmc:MFAMethodType ; rdfs:label "Hardware Token"@en .
+cmmc:AuthenticatorApp a owl:NamedIndividual, cmmc:MFAMethodType ; rdfs:label "Authenticator App"@en .
+cmmc:SmartCard a owl:NamedIndividual, cmmc:MFAMethodType ; rdfs:label "Smart Card"@en .
+cmmc:Biometric a owl:NamedIndividual, cmmc:MFAMethodType ; rdfs:label "Biometric"@en .
+cmmc:SMS_NonPreferred a owl:NamedIndividual, cmmc:MFAMethodType ; rdfs:label "SMS (Non-Preferred)"@en .
+
+### 6.4 — CMMC Assessment Group
+cmmc:CMMCAssessmentGroup a owl:Class ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:oneOf (
+            cmmc:Group1_AC_AU_IA
+            cmmc:Group2_AT_PS_PE_RA_CA
+            cmmc:Group3_CM_MA_MP
+            cmmc:Group4_IR_SC_SI
+        )
+    ] ;
+    rdfs:label "CMMC Assessment Requirement Group"@en .
+
+cmmc:Group1_AC_AU_IA a owl:NamedIndividual, cmmc:CMMCAssessmentGroup ; rdfs:label "Group 1 — AC / AU / IA (42 requirements)"@en .
+cmmc:Group2_AT_PS_PE_RA_CA a owl:NamedIndividual, cmmc:CMMCAssessmentGroup ; rdfs:label "Group 2 — AT / PS / PE / RA / CA (18 requirements)"@en .
+cmmc:Group3_CM_MA_MP a owl:NamedIndividual, cmmc:CMMCAssessmentGroup ; rdfs:label "Group 3 — CM / MA / MP (24 requirements)"@en .
+cmmc:Group4_IR_SC_SI a owl:NamedIndividual, cmmc:CMMCAssessmentGroup ; rdfs:label "Group 4 — IR / SC / SI (26 requirements)"@en .
+
+### 6.5 — DFARS Clause Named Individuals
+cmmc:DFARS_252_204_7012 a owl:NamedIndividual, cmmc:DFARSClause ;
+    rdfs:label "DFARS 252.204-7012"@en ; cmmc:clauseIdentifier "252.204-7012" .
+cmmc:DFARS_252_204_7020 a owl:NamedIndividual, cmmc:DFARSClause ;
+    rdfs:label "DFARS 252.204-7020"@en ; cmmc:clauseIdentifier "252.204-7020" .
+cmmc:DFARS_252_204_7021 a owl:NamedIndividual, cmmc:DFARSClause ;
+    rdfs:label "DFARS 252.204-7021"@en ; cmmc:clauseIdentifier "252.204-7021" .
+
+### 6.Z — RegulatoryObligation Named Individuals [NEW v0.3.0]
+cmmc:RegObligation_32CFR170 a owl:NamedIndividual, cmmc:RegulatoryObligation ;
+    rdfs:label "32 CFR Part 170 — CMMC Program"@en ; cmmc:clauseIdentifier "32 CFR Part 170" .
+cmmc:RegObligation_48CFR204 a owl:NamedIndividual, cmmc:RegulatoryObligation ;
+    rdfs:label "48 CFR Part 204 — CMMC Acquisition"@en ; cmmc:clauseIdentifier "48 CFR Part 204" .
+cmmc:FARClause_52_204_21 a owl:NamedIndividual, cmmc:RegulatoryObligation ;
+    rdfs:label "FAR 52.204-21 — Basic Safeguarding of FCI"@en ; cmmc:clauseIdentifier "FAR 52.204-21" .
+
+### 6.6 — Additional taxonomy enumerations (schema stubs retained from v0.4.2)
+cmmc:CMMCLevel a owl:Class ; rdfs:label "CMMC Level"@en .
+cmmc:CUIType a owl:Class ; rdfs:label "CUI Type"@en .
+cmmc:AssessmentOutcome a owl:Class ; rdfs:label "Assessment Outcome"@en .
+cmmc:POAMStatus a owl:Class ; rdfs:label "POA&M Status"@en .
+cmmc:EncryptionStandard a owl:Class ; rdfs:label "Encryption Standard"@en .
+cmmc:SIEMProduct a owl:Class ; rdfs:label "SIEM Product"@en .
+cmmc:VulnScanTool a owl:Class ; rdfs:label "Vulnerability Scan Tool"@en .
+cmmc:MediaType a owl:Class ; rdfs:label "Media Type"@en .
+cmmc:SanitizationMethod a owl:Class ; rdfs:label "Sanitization Method"@en .
+cmmc:CloudEnvironment a owl:Class ; rdfs:label "Cloud Environment"@en .
+cmmc:CompliancePhase a owl:Class ; rdfs:label "Compliance Phase"@en .
+cmmc:ActorType a owl:Class ; rdfs:label "Actor Type"@en .
+cmmc:PhysicalAccessCredentialType a owl:Class ; rdfs:label "Physical Access Credential Type"@en .
+cmmc:RemoteAccessTool a owl:Class ; rdfs:label "Remote Access Tool"@en .
+cmmc:LogRetentionPeriod a owl:Class ; rdfs:label "Log Retention Period"@en .
+cmmc:PatchingSLA a owl:Class ; rdfs:label "Patching SLA"@en .
+cmmc:FedRAMPPathType a owl:Class ; rdfs:label "FedRAMP Path Type"@en .
+cmmc:BoEComponentType a owl:Class ; rdfs:label "BoE Component Type"@en .
+cmmc:OTAssetClass a owl:Class ; rdfs:label "OT Asset Class"@en .
+cmmc:DFARSClauseEnum a owl:Class ; rdfs:label "DFARS Clause Enum"@en .
+
+### 6.X — Assessment Tier Enum [EXTENDED v0.3.0]
+cmmc:NIST800171AssessmentTier a owl:Class ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:oneOf (
+            cmmc:BasicAssessment cmmc:MediumAssessment cmmc:HighAssessment
+            cmmc:CMMC_L1 cmmc:CMMC_L2_Self cmmc:CMMC_L2_C3PAO cmmc:CMMC_L3
+        )
+    ] ;
+    rdfs:label "Assessment Tier"@en .
+
+cmmc:BasicAssessment a owl:NamedIndividual, cmmc:NIST800171AssessmentTier ; rdfs:label "Basic Assessment"@en .
+cmmc:MediumAssessment a owl:NamedIndividual, cmmc:NIST800171AssessmentTier ; rdfs:label "Medium Assessment"@en .
+cmmc:HighAssessment a owl:NamedIndividual, cmmc:NIST800171AssessmentTier ; rdfs:label "High Assessment"@en .
+cmmc:CMMC_L1 a owl:NamedIndividual, cmmc:NIST800171AssessmentTier ; rdfs:label "CMMC Level 1"@en .
+cmmc:CMMC_L2_Self a owl:NamedIndividual, cmmc:NIST800171AssessmentTier ; rdfs:label "CMMC Level 2 (Self-Assessment)"@en .
+cmmc:CMMC_L2_C3PAO a owl:NamedIndividual, cmmc:NIST800171AssessmentTier ; rdfs:label "CMMC Level 2 (C3PAO)"@en .
+cmmc:CMMC_L3 a owl:NamedIndividual, cmmc:NIST800171AssessmentTier ; rdfs:label "CMMC Level 3 (DIBCAC)"@en .
+
+### 6.Y — Result Submission System Enum [NEW v0.3.0]
+cmmc:ResultSubmissionSystem a owl:Class ;
+    owl:equivalentClass [ a owl:Class ; owl:oneOf ( cmmc:SPRS_System cmmc:eMASS_System ) ] ;
+    rdfs:label "Result Submission System"@en .
+
+cmmc:SPRS_System a owl:NamedIndividual, cmmc:ResultSubmissionSystem ; rdfs:label "SPRS"@en .
+cmmc:eMASS_System a owl:NamedIndividual, cmmc:ResultSubmissionSystem ; rdfs:label "CMMC eMASS"@en .
+
+### 6.Z2 — Limited Dissemination Control (LDC) Enum [NEW v0.4.0]
+cmmc:LimitedDisseminationControl a owl:Class ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:oneOf ( cmmc:LDC_NOFORN cmmc:LDC_FED_ONLY cmmc:LDC_NOCON cmmc:LDC_REL_TO cmmc:LDC_DISPLAY_ONLY )
+    ] ;
+    rdfs:label "CUI Limited Dissemination Control"@en ;
+    skos:exactMatch canon:LimitedDisseminationControl .
+
+cmmc:LDC_NOFORN a owl:NamedIndividual, cmmc:LimitedDisseminationControl ; rdfs:label "NOFORN"@en .
+cmmc:LDC_FED_ONLY a owl:NamedIndividual, cmmc:LimitedDisseminationControl ; rdfs:label "FED ONLY"@en .
+cmmc:LDC_NOCON a owl:NamedIndividual, cmmc:LimitedDisseminationControl ; rdfs:label "NOCON"@en .
+cmmc:LDC_REL_TO a owl:NamedIndividual, cmmc:LimitedDisseminationControl ; rdfs:label "REL TO"@en .
+cmmc:LDC_DISPLAY_ONLY a owl:NamedIndividual, cmmc:LimitedDisseminationControl ; rdfs:label "DISPLAY ONLY"@en .
+
+cmmc:CertificateAuthority_MedAssurance a owl:Class ; rdfs:label "Medium Assurance Certificate Authority"@en .
+
+
+###############################################################################
+# SECTION 7: OPEN GAPS CARRIED FORWARD
+###############################################################################
+
+### GAP 6 — SMS MFA Hard Ruling [OPEN]
+### GAP 14 — SPRS Per-Control Weighted Values [CLOSED v0.2.0]
+### GAP OT/ICS — CMMC-AB Enduring Exception [OPEN]
+### GAP CONTRACTOR_CLASS — OWL vs. SWRL precision [OPEN]
+### GAP EnhancedReq-24 — NIST SP 800-172 24 Requirement IDs [OPEN v0.3.0]
+### GAP DoD-ODP-Memo — Rev 3 ODP Memo Impact [MONITORING v0.3.0]
+### GAP CUIControlLevel — cuiControlLevel values not yet populated [OPEN v0.4.0]
+### GAP LDC-HAS_LDC — object property for LDC not yet added [OPEN v0.4.0]
+### GAP poamProhibited-full-list — CLOSED v0.4.2
+### GAP GOVERNS — DFARSClause sub-graph isolated from Control sub-graph [PARTIAL RESOLUTION v0.4.1]
+### GAP FLOWDOWN — Flow-down obligation chain not modeled [PARTIALLY RESOLVED v0.4.1]
+### GAP FEDRAMP-CLOUD — FedRAMP cloud requirement not modeled as graph node [PARTIALLY RESOLVED v0.4.1]
+
+### ---- NEW GAPS INTRODUCED BY v0.4.3 MERGE ----
+
+### GAP v0.4.3-1 — parentEngagement semantics vs PRECEDED_BY [RESOLVED v0.4.3]
+### Status: Delta originally referenced cmmc:parentEngagement which does not exist in v0.4.2.
+###   Merge resolves by rewriting GATE-FCA-CLEARED to use cmmc:PRECEDED_BY (already defined
+###   in v0.4.2 Section 4, v0.3.0). Semantic fit confirmed — PRECEDED_BY is Engagement→Engagement
+###   and represents temporal/causal succession, which matches the invariant intent exactly.
+### No action required. Monitor for edge cases where the gate's Cypher walks multi-hop
+###   PRECEDED_BY chains (e.g., PCA → L2_C3PAO → L2_Self); validate with Session 9 simulation.
+
+### GAP v0.4.3-2 — Invariant class is documentation-only, not reasoner-enforced [OPEN v0.4.3]
+### Status: cmmc:Invariant class minted in v0.4.3 serves as anchor for extendsInvariant
+###   references. It does NOT replace owl:Restriction blocks or Cypher enforcement.
+### Action when resolved: Decide whether Invariant nodes should be loaded into Neo4j
+###   alongside their implementations for meta-query support (e.g., "show me all invariants
+###   introduced after v0.4.0"), or whether it remains TTL-only metadata.
+### Blocked on: use case emergence — defer until a traversal or simulation requires it.
+
+### GAP v0.4.3-3 — SUBJECT_TO_ENGAGEMENT missing from Step-18 load order [OPEN, HANDOFF-DOC]
+### Status: Flagged in Session 7 canon Open Item #2 and carried forward through Session 8.
+###   This is a handoff-document issue, not a TTL issue — the TTL is consistent.
+###   Must be resolved in neo4j-handoff-notes-v0.4.3.md before appending new load steps.
+### Action: Update handoff doc load sequence to include SUBJECT_TO_ENGAGEMENT edge creation
+###   between Engagement and OrganizationSeekingCertification nodes.
+
+### GAP v0.4.3-4 — Authority as first-class node vs string [DEFERRED]
+### Status: cmmc:oversightAuthority is a string datatype property in v0.4.3. A future
+###   delta may promote Authority (DoD, DoJ, DIBCAC, etc.) to first-class nodes with
+###   their own properties (jurisdiction, statutory basis, enforcement history).
+### Action: Defer to v0.4.4 or later. Not blocking for current FCA-clearing scenarios.
+
+### GAP v0.4.3-5 — PartialPass outcome for PCA [DEFERRED to Taxonomize]
+### Status: Simulation surfaced a question about whether 'PartialPass' is in the PCA
+###   outcome taxonomy for Invariant 12. Not resolved in v0.4.3.
+### Action: Feed into /taxonomize verb for Session 9 or 10.
+
+### GAP v0.4.3-6 — EngagementClosureRecord class [CANDIDATE for v0.4.4]
+### Status: Identified in Session 8 as the audit-trail artifact produced when
+###   Conditional→Final transitions complete. Not included in v0.4.3 scope.
+### Action: Candidate class for v0.4.4 delta.
+
+### END OF ONTOLOGY v0.4.3 ###
+
+###############################################################################
+# MERGED v0.4.4 DELTA (Phase 2 master merge — 2026-04-25)
+# Source: cmmc-ontology-v0.4.4-delta.ttl
+# Reasoner: HermiT PASS on delta-only run; re-validated post-merge below.
+# No conflicts with v0.4.3 (per ontology-summary-v0.4.4-delta.md).
+###############################################################################
+
+### =====================================================================
+### CMMC Ontology — v0.4.4 Delta Patch
+### Base: cmmc-ontology-v0.4.3.ttl (merged master, 2026-04-19)
+### Delta source: project_canon_morning_review_queue_phase1.md
+###                + [CANON SOURCE — Phase 0 Routines Plumbing — 2026-04-25]
+### Generated: 2026-04-25
+### Stage: Verb 4 — /ontogize (incremental, runtime-build Phase 1)
+###
+### Apply by concatenating this fragment after the v0.4.3 class/property/invariant
+### sections of cmmc-ontology-v0.4.3.ttl. No existing declarations are removed.
+### Three new top-level classes (cmmc:LoopArtifact, cmmc:Routine,
+### cmmc:ControlObjective) plus one subclass (cmmc:MorningReviewItem),
+### three new object properties, eight new datatype properties, two SKOS
+### concept schemes, three new cmmc:Invariant instances, and one inline
+### SHACL NodeShape enforcing the status FSM and the missing-data payload rule.
+###
+### Phase 1 emits this TTL delta only. It does NOT load anything into the
+### runtime cmmc Neo4j db (that is Phase 2's /knowledge-graph step). It does
+### NOT write a constrained-write MCP server (Phase 2). Do not advance to
+### Verb 5 (/knowledge-graph) until this delta has been merged into the
+### v0.4.4 master ontology TTL.
+### =====================================================================
+
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix gist:  <https://ontologies.semanticarts.com/gist/> .
+@prefix canon: <https://canonmanagement.io/vocab/cmmc/> .
+@prefix cmmc:  <http://canonmanagement.io/cmmc/ontology#> .
+
+### ---------------------------------------------------------------------
+### DELTA REPORT (v0.4.3 → v0.4.4)
+### ---------------------------------------------------------------------
+### New classes (4):
+###   - cmmc:LoopArtifact         rdfs:subClassOf gist:Commitment
+###       (covering concept: a future-state obligation produced by an Eight
+###        Verb Loop pass; queue-shaped work the system commits to surface)
+###   - cmmc:MorningReviewItem    rdfs:subClassOf cmmc:LoopArtifact
+###   - cmmc:Routine              rdfs:subClassOf gist:Behavior
+###       (covering concept: a recurring scheduled-task agent; named
+###        individuals are the canonical loop-1, loop-2, manual routines)
+###   - cmmc:ControlObjective     rdfs:subClassOf gist:Commitment
+###       (covering concept: a single assessment objective derived from a
+###        NIST SP 800-171 Control; finer-grained than cmmc:Control)
+###
+### New object properties (3):
+###   - cmmc:concerns      (domain MorningReviewItem;
+###                          range owl:unionOf {Engagement, Control,
+###                                             owl:Ontology, ControlObjective})
+###   - cmmc:proposedBy    (domain MorningReviewItem; range Routine)
+###   - cmmc:resolvedBy    (domain MorningReviewItem; range Affirmation)
+###
+### New datatype properties (8):
+###   - cmmc:itemId        xsd:string  (functional)
+###   - cmmc:proposedAt    xsd:dateTime (functional)
+###   - cmmc:gapKind       xsd:string with controlled vocabulary (5 values)
+###   - cmmc:targetGraph   xsd:string  (canon-mgmt | <engagementId>)
+###   - cmmc:summary       xsd:string
+###   - cmmc:payload       xsd:string  (JSON literal, kind-specific shape)
+###   - cmmc:status        xsd:string with controlled vocabulary (FSM, 4 values)
+###   - cmmc:missingFields xsd:string  (parsed from payload by gapKind=missing-data)
+###
+### New named individuals (3):
+###   - cmmc:Routine-Loop1   a cmmc:Routine
+###   - cmmc:Routine-Loop2   a cmmc:Routine
+###   - cmmc:Routine-Manual  a cmmc:Routine
+###
+### New SKOS schemes (2):
+###   - cmmc:GapKindScheme        — 5 concepts (forward-compat, McComb-aligned)
+###   - cmmc:MorningReviewStatusScheme — 4 concepts (FSM canonical labels)
+###
+### New invariants (3):
+###   - cmmc:Invariant17-MorningReviewFSM
+###   - cmmc:Invariant18-MissingDataRequiresMissingFields
+###   - cmmc:Invariant19-MorningReviewItemDefaultPending
+###
+### New SHACL NodeShape (1):
+###   - cmmc:MorningReviewItemShape — encodes FSM membership + missing-data rule
+###
+### Conflicts with existing ontology (v0.4.3): none.
+###   - cmmc:Affirmation already exists (declared at v0.4.3 line 294); reused as
+###     range of cmmc:resolvedBy. No re-declaration.
+###   - cmmc:Engagement and cmmc:Control already exist; reused as union members
+###     of cmmc:concerns range. No re-declaration.
+###   - owl:Ontology is the standard OWL class for ontology individuals; the
+###     v0.4.3 master is itself an owl:Ontology. Reused as a union member of
+###     cmmc:concerns range; no cmmc:Ontology class minted (covering concept
+###     already exists upstream — McComb principle 3).
+###   - cmmc:Invariant class minted in v0.4.3 merge; reused for the three
+###     new Invariant individuals.
+###
+### McComb principles applied:
+###   (1) Data is permanent, applications are ephemeral — the queue schema is
+###       designed to outlive the Phase 2 MCP server that writes to it.
+###   (3) Use gist primitives as covering concepts — LoopArtifact, Routine,
+###       and ControlObjective all subclass through gist; owl:Ontology reused.
+###   (4) Commitments and Resources as core — the queue item is a Commitment
+###       (a future-tense obligation to review); state changes (pending →
+###       approved → executed) are property updates, not separate Event classes.
+###   (5) Separate ontology from taxonomy — gapKind and status are SKOS
+###       concept schemes (instances) layered alongside xsd:string properties
+###       with owl:oneOf datatype enums; FSM transitions enforced via SHACL,
+###       not OWL classes per state.
+###   (7) Invariants are the enforcement layer — the FSM, the default-pending
+###       rule, and the missing-data → missingFields rule are all stated as
+###       cmmc:Invariant instances AND as a SHACL NodeShape.
+###
+### Vocabulary discipline (Phase 0 canon, Session 10):
+###   - Use "CMMC Level 1/2/3" in prose. Never "L1/L2/L3".
+###   - "Routine" (capital R) = scheduled-task agent (this ontology's class).
+###     Distinct from OpenClaw cron jobs; the canon term is reserved.
+###   - "MorningReviewItem" is the canonical Neo4j label (Session 10 freeze).
+### ---------------------------------------------------------------------
+
+### =====================================================================
+### 1. NEW CLASSES
+### =====================================================================
+
+### ---- cmmc:LoopArtifact ------------------------------------------------
+### Covering concept: gist:Commitment (a future-state obligation produced by
+### a pass of the Eight Verb Loop — work the system commits to surface for
+### review, approval, or execution).
+### McComb principle: ~80% of business activity is the making and fulfilling
+### of obligations. A LoopArtifact is the system's record of an obligation
+### created by a Loop pass. Subclasses formalize the kind of work surfaced.
+### Origin: Phase 0 Session 10 — runtime needs a queue substrate above the
+### ontology that is itself an artifact of the Loop, not part of the
+### compliance domain proper. LoopArtifact is the parent for any future
+### queue/work-item classes (e.g. EveningCloseoutItem, AdHocReviewItem).
+
+cmmc:LoopArtifact a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;            ### gist check: subclass of gist:Commitment — future-state work obligation surfaced by the Loop ✓
+    rdfs:label "Loop Artifact"@en ;
+    rdfs:comment "An obligation produced by a single pass of the Eight Verb Loop (Elicit → Taxonomize → Canonize → Ontogize → Knowledge Graph → Traverse → Simulate → Enforce). LoopArtifacts are queue items the runtime commits to surface for human review or downstream automation. Subclasses formalize the kind of work surfaced; this parent class lets the runtime treat all such artifacts uniformly without conflating them with compliance-domain obligations such as ContractObligation."@en ;
+    skos:exactMatch canon:LoopArtifact .
+    ### Layer 3X (runtime/build extension): not part of the CMMC compliance
+    ### domain proper. Distinguishes work the system surfaces ABOUT the
+    ### domain from obligations IN the domain.
+
+### ---- cmmc:MorningReviewItem ------------------------------------------
+### Covering concept: gist:Commitment via cmmc:LoopArtifact.
+### Phase 1 anchor class. Each instance is one row in the morning-review
+### queue surfaced to the user (Dalaun) by Loop 1 (overnight pass) or
+### Loop 2 (weekly pass), or filed manually. Status FSM:
+###     pending → approved | rejected
+###     approved → executed
+### No backward transitions. Default at creation is "pending". See
+### cmmc:Invariant17-MorningReviewFSM, cmmc:Invariant19-MorningReviewItemDefaultPending,
+### and cmmc:MorningReviewItemShape (SHACL).
+
+cmmc:MorningReviewItem a owl:Class ;
+    rdfs:subClassOf cmmc:LoopArtifact ;          ### gist check: subclass of gist:Commitment via LoopArtifact ✓
+    rdfs:label "Morning Review Item"@en ;
+    rdfs:comment "A single row in the morning-review queue surfaced by the runtime to the human reviewer. Each MorningReviewItem represents a gap or proposal that the Eight Verb Loop has detected and that requires human approval before downstream automation acts. Canonical Neo4j label (locked in Session 10 Phase 0): MorningReviewItem. Created by Routine instances (loop-1, loop-2, manual). Resolved by attaching an Affirmation when status transitions to executed."@en ;
+    skos:exactMatch canon:MorningReviewItem .
+
+### ---- cmmc:Routine -----------------------------------------------------
+### Covering concept: gist:Behavior (a recurring pattern of activity
+### scheduled to fire on a defined cadence; the agent that proposes
+### LoopArtifacts).
+### McComb principle: Reuse of broad gist primitives. A Routine is not a
+### Person, not an Organization, not an Event; it is the Behavior pattern
+### that emits queue items.
+### Naming distinction (Session 10 canon): Routines (capital R) are scheduled
+### tasks that produce LoopArtifacts. Distinct from OpenClaw cron jobs
+### (which are infrastructure plumbing). Three named individuals minted
+### below cover the Phase 1 design space.
+
+cmmc:Routine a owl:Class ;
+    rdfs:subClassOf gist:Behavior ;              ### gist check: subclass of gist:Behavior — recurring scheduled-task agent ✓
+    rdfs:label "Routine"@en ;
+    rdfs:comment "A recurring, scheduled-task agent that proposes LoopArtifacts. Routines are not the items themselves; they are the Behavior pattern that surfaces items. Phase 1 defines three canonical individuals: loop-1 (overnight pass), loop-2 (weekly pass), manual (human-filed item). Future routines may include loop-3 (monthly pass) or domain-specific scanners."@en ;
+    skos:exactMatch canon:Routine .
+
+### ---- cmmc:ControlObjective -------------------------------------------
+### Covering concept: gist:Commitment (a single assessment objective
+### derived from a NIST SP 800-171 Control; finer-grained than the parent
+### Control, which itself is a Commitment).
+### Origin: a MorningReviewItem may concern a single ControlObjective
+### (e.g. AC.L2-3.1.1.a) rather than the whole Control (AC.L2-3.1.1).
+### NIST SP 800-171A defines assessment objectives a/b/c per control.
+
+cmmc:ControlObjective a owl:Class ;
+    rdfs:subClassOf gist:Commitment ;            ### gist check: subclass of gist:Commitment — finer-grained than Control ✓
+    rdfs:label "Control Objective"@en ;
+    rdfs:comment "A single assessment objective derived from a NIST SP 800-171A control. NIST SP 800-171A decomposes each Control into one or more assessment objectives (typically labeled a, b, c, ...). Cited by identifier patterns such as AC.L2-3.1.1.a. ControlObjective is the finest-grained obligation unit in the CMMC compliance domain; many findings, oversight requirements, and remediation tasks attach at the objective level rather than the Control level."@en ;
+    skos:exactMatch canon:ControlObjective .
+
+### =====================================================================
+### 2. NEW OBJECT PROPERTIES
+### =====================================================================
+
+### ---- cmmc:concerns ---------------------------------------------------
+### Domain: MorningReviewItem.
+### Range: owl:unionOf { cmmc:Engagement, cmmc:Control,
+###                      owl:Ontology, cmmc:ControlObjective }.
+### McComb tradeoff acknowledged: McComb advises broad properties without
+### strict ranges (gist principle). Here the prompt prescribes a union to
+### keep downstream consumers (the Phase 2 MCP server) able to constrain
+### what concerns can point at. The union is the narrowest range that
+### still admits the four concrete subject kinds enumerated in the
+### Phase 1 design memory.
+
+cmmc:concerns a owl:ObjectProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range [
+        a owl:Class ;
+        owl:unionOf ( cmmc:Engagement cmmc:Control owl:Ontology cmmc:ControlObjective )
+    ] ;
+    rdfs:label "Concerns"@en ;
+    rdfs:comment "Links a MorningReviewItem to the subject of the gap or proposal. Range is restricted to the four canonical subject kinds: an Engagement (the gap is data missing from a specific engagement), a Control (the gap concerns a NIST control's representation), an Ontology (the gap is an ontology delta — a missing class, property, or invariant), or a ControlObjective (the gap is at the assessment-objective grain). Multi-valued: an item may concern multiple subjects (e.g. an Engagement and the specific Control it failed)."@en ;
+    skos:exactMatch canon:concerns .
+
+### ---- cmmc:proposedBy -------------------------------------------------
+### Domain: MorningReviewItem. Range: Routine.
+
+cmmc:proposedBy a owl:ObjectProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range cmmc:Routine ;
+    rdfs:label "Proposed By"@en ;
+    rdfs:comment "Identifies the Routine that surfaced this MorningReviewItem. Functional in practice (each item has exactly one proposing Routine) but not declared owl:FunctionalProperty here to allow future composite-routine scenarios. The three canonical proposing Routine individuals are cmmc:Routine-Loop1, cmmc:Routine-Loop2, and cmmc:Routine-Manual."@en ;
+    skos:exactMatch canon:proposedBy .
+
+### ---- cmmc:resolvedBy -------------------------------------------------
+### Domain: MorningReviewItem. Range: Affirmation (already exists in v0.4.3).
+
+cmmc:resolvedBy a owl:ObjectProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range cmmc:Affirmation ;
+    rdfs:label "Resolved By"@en ;
+    rdfs:comment "Links a MorningReviewItem to the Affirmation produced when the item is approved and executed. Present only when status='executed'. Provides the evidence trail from a runtime queue decision back to the Affirmation record (which itself sits in the compliance domain proper). The Affirmation captures the human approver, decision timestamp, and the action taken."@en ;
+    skos:exactMatch canon:resolvedBy .
+
+### =====================================================================
+### 3. NEW DATATYPE PROPERTIES
+### =====================================================================
+
+cmmc:itemId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range xsd:string ;
+    rdfs:label "Item Id"@en ;
+    rdfs:comment "Globally unique identifier for the MorningReviewItem. Convention: UUID v7 string (time-ordered) so insertion order is recoverable from the ID. Functional — exactly one itemId per item."@en .
+
+cmmc:proposedAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "Proposed At"@en ;
+    rdfs:comment "Wall-clock timestamp at which the proposing Routine emitted the item. ISO 8601, timezone-aware. Functional. The runtime sorts the morning queue by this value ascending."@en .
+
+cmmc:gapKind a owl:DatatypeProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range xsd:string ;
+    rdfs:label "Gap Kind"@en ;
+    rdfs:comment "The kind of gap or proposal this item represents. Five canonical values managed as a SKOS concept scheme (cmmc:GapKindScheme): 'missing-data' (an Engagement is missing data the runtime cannot self-fill), 'ontology-delta' (the ontology lacks a needed class/property/invariant), 'harness-delta' (the runtime harness needs a code/config change), 'elicitation-question' (a human SME needs to answer a question before the Loop can advance), 'gate-state-change' (a gate query result has flipped). String-typed for Neo4j round-trip simplicity; the SKOS scheme provides the governance surface (per McComb principle 5)."@en .
+
+### Constrain enum values with owl:oneOf on an anonymous datatype.
+### SHACL provides the runtime constraint; this aids reasoner inference.
+_:gapKindValueSet a rdfs:Datatype ;
+    owl:equivalentClass [
+        a rdfs:Datatype ;
+        owl:oneOf ( "missing-data" "ontology-delta" "harness-delta"
+                    "elicitation-question" "gate-state-change" )
+    ] .
+
+cmmc:targetGraph a owl:DatatypeProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range xsd:string ;
+    rdfs:label "Target Graph"@en ;
+    rdfs:comment "Identifier of the Neo4j graph context the item refers to. Two patterns: 'canon-mgmt' (Canon Management's own self-assessment graph, shared substrate) or '<engagementId>' (e.g. 'ENG-2026-MERIDIAN-001' — a specific client engagement subgraph). Disambiguates items that concern the same Control or ControlObjective across multiple engagements."@en .
+
+cmmc:summary a owl:DatatypeProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range xsd:string ;
+    rdfs:label "Summary"@en ;
+    rdfs:comment "One-line, human-readable summary of the gap or proposal. Rendered in the WhatsApp morning-review digest emitted by Routine A. Should be terse and decision-supporting (e.g. 'ENG-2026-CANON-001 missing assessedSPRSScore — needs SME elicitation')."@en .
+
+cmmc:payload a owl:DatatypeProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range xsd:string ;
+    rdfs:label "Payload"@en ;
+    rdfs:comment "Kind-specific structured data, serialized as a JSON literal. Schema varies by gapKind: for 'missing-data', payload MUST contain a non-empty 'missingFields' array (see cmmc:Invariant18-MissingDataRequiresMissingFields). For 'ontology-delta', payload describes proposed class/property additions. For 'harness-delta', payload references the affected code path. For 'elicitation-question', payload contains the question text and proposed SME target. For 'gate-state-change', payload captures before/after gate values."@en .
+
+cmmc:status a owl:DatatypeProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range xsd:string ;
+    rdfs:label "Status"@en ;
+    rdfs:comment "Position of this item in the morning-review FSM. Four canonical values (cmmc:MorningReviewStatusScheme): 'pending' (default at creation; awaiting human review), 'approved' (human approved the proposal but action has not yet executed), 'rejected' (human declined; terminal state), 'executed' (action taken; an Affirmation is attached via cmmc:resolvedBy; terminal state). FSM enforced by cmmc:Invariant17-MorningReviewFSM and the SHACL shape cmmc:MorningReviewItemShape."@en .
+
+### Constrain enum values with owl:oneOf on an anonymous datatype.
+_:statusValueSet a rdfs:Datatype ;
+    owl:equivalentClass [
+        a rdfs:Datatype ;
+        owl:oneOf ( "pending" "approved" "rejected" "executed" )
+    ] .
+
+cmmc:missingFields a owl:DatatypeProperty ;
+    rdfs:domain cmmc:MorningReviewItem ;
+    rdfs:range xsd:string ;
+    rdfs:label "Missing Fields"@en ;
+    rdfs:comment "Convenience denormalization of the missingFields array embedded in payload, when gapKind='missing-data'. One literal per missing field name (e.g. 'assessedSPRSScore', 'priorSPRSScore'). Mandatory and non-empty when gapKind='missing-data' (see cmmc:Invariant18). Optional otherwise. Lets Cypher queries filter on missing fields without parsing JSON."@en .
+
+### =====================================================================
+### 4. NAMED INDIVIDUALS — CANONICAL ROUTINES
+### =====================================================================
+
+cmmc:Routine-Loop1 a cmmc:Routine ;
+    rdfs:label "Routine: Loop 1 (overnight pass)"@en ;
+    rdfs:comment "Overnight Loop 1 routine. Scans the cmmc graph for missing-data, ontology-delta, and gate-state-change gaps. First scheduled fire was 2026-04-26 07:00 America/Chicago via /etc/cron.d/cmmc-gate-health on the VPS (Phase 0 Routine A scaffolding). Phase 3 will extend this routine to emit MorningReviewItem nodes for every detected gap."@en ;
+    skos:notation "loop-1" .
+
+cmmc:Routine-Loop2 a cmmc:Routine ;
+    rdfs:label "Routine: Loop 2 (weekly pass)"@en ;
+    rdfs:comment "Weekly Loop 2 routine. Performs deeper traversal-and-simulation passes whose results are too expensive to run nightly. Surfaces harness-delta and elicitation-question items. Scheduled cadence: weekly, day to be determined in Phase 3."@en ;
+    skos:notation "loop-2" .
+
+cmmc:Routine-Manual a cmmc:Routine ;
+    rdfs:label "Routine: Manual (human-filed item)"@en ;
+    rdfs:comment "Marker for MorningReviewItems filed by a human directly (not surfaced by an automated pass). The Phase 2 constrained-write MCP server accepts manual items so the human reviewer can route observations into the same queue alongside Routine-Loop1 and Routine-Loop2 output."@en ;
+    skos:notation "manual" .
+
+### =====================================================================
+### 5. SKOS CONCEPT SCHEMES (controlled vocabularies)
+### =====================================================================
+### Per McComb principle 5: separate ontology from taxonomy. Status and
+### gapKind values live as SKOS concepts so that adding a new value (e.g.
+### a sixth gapKind in a future Phase) does not require an ontology
+### version bump — only a SKOS scheme update.
+
+cmmc:GapKindScheme a skos:ConceptScheme ;
+    rdfs:label "Morning Review Gap Kind Scheme"@en ;
+    rdfs:comment "Controlled vocabulary for cmmc:gapKind values."@en ;
+    skos:hasTopConcept cmmc:GapKind-MissingData ,
+                       cmmc:GapKind-OntologyDelta ,
+                       cmmc:GapKind-HarnessDelta ,
+                       cmmc:GapKind-ElicitationQuestion ,
+                       cmmc:GapKind-GateStateChange .
+
+cmmc:GapKind-MissingData a skos:Concept ;
+    skos:inScheme cmmc:GapKindScheme ;
+    skos:notation "missing-data" ;
+    skos:prefLabel "Missing Data"@en ;
+    skos:definition "An Engagement (or other concerned entity) is missing one or more required fields the runtime cannot self-fill. Requires a non-empty cmmc:missingFields list."@en .
+
+cmmc:GapKind-OntologyDelta a skos:Concept ;
+    skos:inScheme cmmc:GapKindScheme ;
+    skos:notation "ontology-delta" ;
+    skos:prefLabel "Ontology Delta"@en ;
+    skos:definition "The CMMC ontology lacks a needed class, property, or invariant. Approval routes to a future /ontogize pass."@en .
+
+cmmc:GapKind-HarnessDelta a skos:Concept ;
+    skos:inScheme cmmc:GapKindScheme ;
+    skos:notation "harness-delta" ;
+    skos:prefLabel "Harness Delta"@en ;
+    skos:definition "The runtime harness (MCP server, routine code, cron config) needs a change. Approval routes to a Phase-2-onwards code/config edit."@en .
+
+cmmc:GapKind-ElicitationQuestion a skos:Concept ;
+    skos:inScheme cmmc:GapKindScheme ;
+    skos:notation "elicitation-question" ;
+    skos:prefLabel "Elicitation Question"@en ;
+    skos:definition "A human SME must answer a question before the Loop can advance. Approval routes to a /elicit session with the named SME target."@en .
+
+cmmc:GapKind-GateStateChange a skos:Concept ;
+    skos:inScheme cmmc:GapKindScheme ;
+    skos:notation "gate-state-change" ;
+    skos:prefLabel "Gate State Change"@en ;
+    skos:definition "A compliance gate query has flipped state since the prior pass (e.g. a contractor moved from Conditional to Final, or a fcaExposureFlag cleared). Surfaced for human awareness, not always action-required."@en .
+
+cmmc:MorningReviewStatusScheme a skos:ConceptScheme ;
+    rdfs:label "Morning Review Status Scheme (FSM)"@en ;
+    rdfs:comment "Controlled vocabulary for cmmc:status values. The four concepts together form a finite state machine; transitions enforced by cmmc:Invariant17 and cmmc:MorningReviewItemShape."@en ;
+    skos:hasTopConcept cmmc:Status-Pending ,
+                       cmmc:Status-Approved ,
+                       cmmc:Status-Rejected ,
+                       cmmc:Status-Executed .
+
+cmmc:Status-Pending a skos:Concept ;
+    skos:inScheme cmmc:MorningReviewStatusScheme ;
+    skos:notation "pending" ;
+    skos:prefLabel "Pending"@en ;
+    skos:definition "Default state at creation. Awaiting human review."@en .
+
+cmmc:Status-Approved a skos:Concept ;
+    skos:inScheme cmmc:MorningReviewStatusScheme ;
+    skos:notation "approved" ;
+    skos:prefLabel "Approved"@en ;
+    skos:definition "Human approved the proposal. Awaiting execution by downstream automation. Not terminal."@en .
+
+cmmc:Status-Rejected a skos:Concept ;
+    skos:inScheme cmmc:MorningReviewStatusScheme ;
+    skos:notation "rejected" ;
+    skos:prefLabel "Rejected"@en ;
+    skos:definition "Human declined the proposal. Terminal."@en .
+
+cmmc:Status-Executed a skos:Concept ;
+    skos:inScheme cmmc:MorningReviewStatusScheme ;
+    skos:notation "executed" ;
+    skos:prefLabel "Executed"@en ;
+    skos:definition "Approved item has been executed; an Affirmation is attached via cmmc:resolvedBy. Terminal."@en .
+
+### =====================================================================
+### 6. INVARIANTS (governance layer — McComb principle 7)
+### =====================================================================
+
+cmmc:Invariant17-MorningReviewFSM a cmmc:Invariant ;
+    rdfs:label "Morning Review Status FSM"@en ;
+    rdfs:comment "Status transitions on a MorningReviewItem are restricted to the canonical FSM: pending → approved | rejected; approved → executed. No other transitions are valid. Specifically: rejected and executed are terminal (no outgoing transitions). Backward transitions (e.g. approved → pending, executed → approved) are forbidden. Skip transitions (e.g. pending → executed without intermediate approved) are forbidden. Initial state at creation is always pending. Enforced by cmmc:MorningReviewItemShape (SHACL) and by the Phase 2 constrained-write MCP server, which rejects any write that violates the FSM."@en ;
+    cmmc:sourceRef "project_canon_morning_review_queue_phase1.md — Proposed MorningReviewItem shape; Phase 1 prompt invariant 4." .
+
+cmmc:Invariant18-MissingDataRequiresMissingFields a cmmc:Invariant ;
+    rdfs:label "Missing-Data Items Require Non-Empty missingFields"@en ;
+    rdfs:comment "When cmmc:gapKind='missing-data' on a MorningReviewItem, the item MUST carry a non-empty cmmc:missingFields list AND its cmmc:payload JSON MUST contain a non-empty 'missingFields' array of field names. The two representations (denormalized triples + JSON payload) MUST agree. This guarantees that downstream automation (Phase 3 missing-data scanner) can route every missing-data item to a concrete elicitation target without re-parsing payload shape on every load. Canonical exemplar: ENG-2026-CANON-001 missing-score pattern, with missingFields = [assessedSPRSScore, priorSPRSScore, prohibitedNotMet, poamEligibleCount]."@en ;
+    cmmc:sourceRef "project_canon_morning_review_queue_phase1.md — Concrete payload examples for gapKind='missing-data'; Phase 1 prompt 'Don't forget' clause." .
+
+cmmc:Invariant19-MorningReviewItemDefaultPending a cmmc:Invariant ;
+    rdfs:label "MorningReviewItem Defaults to Pending at Creation"@en ;
+    rdfs:comment "Every newly created MorningReviewItem MUST have cmmc:status='pending'. Direct creation in any other state is forbidden. The Phase 2 constrained-write MCP server enforces this server-side (the create tool ignores any client-supplied status and sets pending unconditionally). The SHACL shape cmmc:MorningReviewItemShape additionally constrains status membership to the four canonical values, so a malformed write fails validation regardless of which state it claims."@en ;
+    cmmc:sourceRef "Phase 1 prompt invariant 4: 'every MorningReviewItem MUST have status=pending at creation'." .
+
+### =====================================================================
+### 7. SHACL NODESHAPE (runtime enforcement)
+### =====================================================================
+### Inline SHACL — co-located with the OWL declarations so Phase 2 tooling
+### can extract a single shapes file from this delta. The shape encodes:
+###   (a) status MUST be one of {pending, approved, rejected, executed}
+###   (b) gapKind MUST be one of the five canonical values
+###   (c) when gapKind = 'missing-data', missingFields MUST exist with
+###       at least one value (sh:qualifiedValueShape pattern)
+###   (d) itemId, proposedAt, summary, payload, gapKind, status, targetGraph
+###       are all required (minCount 1)
+###   (e) proposedBy MUST point to exactly one cmmc:Routine
+###
+### The FSM transition rule (Invariant 17) cannot be enforced by SHACL
+### alone — SHACL validates a single state, not a transition between two
+### states. Transition enforcement is the Phase 2 constrained-write MCP
+### server's responsibility. The shape catches malformed states; the MCP
+### server catches malformed transitions.
+
+cmmc:MorningReviewItemShape a sh:NodeShape ;
+    sh:targetClass cmmc:MorningReviewItem ;
+
+    ### Required: itemId (exactly one)
+    sh:property [
+        sh:path cmmc:itemId ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "MorningReviewItem requires exactly one itemId."@en ;
+    ] ;
+
+    ### Required: proposedAt (exactly one)
+    sh:property [
+        sh:path cmmc:proposedAt ;
+        sh:datatype xsd:dateTime ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "MorningReviewItem requires exactly one proposedAt timestamp."@en ;
+    ] ;
+
+    ### Required: summary (exactly one)
+    sh:property [
+        sh:path cmmc:summary ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "MorningReviewItem requires exactly one one-line summary."@en ;
+    ] ;
+
+    ### Required: payload (exactly one)
+    sh:property [
+        sh:path cmmc:payload ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "MorningReviewItem requires exactly one payload (JSON literal)."@en ;
+    ] ;
+
+    ### Required: targetGraph (exactly one)
+    sh:property [
+        sh:path cmmc:targetGraph ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "MorningReviewItem requires exactly one targetGraph identifier."@en ;
+    ] ;
+
+    ### Required + value-set: gapKind
+    sh:property [
+        sh:path cmmc:gapKind ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( "missing-data" "ontology-delta" "harness-delta"
+                "elicitation-question" "gate-state-change" ) ;
+        sh:message "gapKind must be one of: missing-data, ontology-delta, harness-delta, elicitation-question, gate-state-change."@en ;
+    ] ;
+
+    ### Required + value-set: status (FSM membership)
+    sh:property [
+        sh:path cmmc:status ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( "pending" "approved" "rejected" "executed" ) ;
+        sh:message "status must be one of: pending, approved, rejected, executed."@en ;
+    ] ;
+
+    ### Required: proposedBy (exactly one Routine)
+    sh:property [
+        sh:path cmmc:proposedBy ;
+        sh:class cmmc:Routine ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "MorningReviewItem requires exactly one proposing Routine."@en ;
+    ] ;
+
+    ### Conditional: when gapKind='missing-data', missingFields must be
+    ### non-empty. Encoded as sh:or over two patterns:
+    ###   (i)  gapKind != 'missing-data'                       (vacuously satisfied)
+    ###   (ii) gapKind = 'missing-data' AND missingFields >= 1
+    sh:or (
+        [
+            sh:path cmmc:gapKind ;
+            sh:not [ sh:hasValue "missing-data" ]
+        ]
+        [
+            sh:path cmmc:missingFields ;
+            sh:minCount 1 ;
+            sh:message "When gapKind='missing-data', cmmc:missingFields MUST contain at least one field name (Invariant 18)."@en ;
+        ]
+    ) ;
+
+    sh:message "MorningReviewItem violates v0.4.4 invariants — see specific property violations above."@en .
+
+### =====================================================================
+### END v0.4.4 DELTA PATCH
+### =====================================================================
+
+### END OF ONTOLOGY v0.4.4 ###
